@@ -1,0 +1,169 @@
+/* ========================================
+   SAMPLE GLOBAL CSS FOR TOPLIST BLOCK
+   ======================================== */
+
+/* Example 1: Irish Green Theme */
+.toplist-playground .operator-column-ranking-v2 {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2 {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.toplist-playground .operator-item {
+    border-color: #d1fae5;
+}
+
+.toplist-playground .operator-item:hover {
+    border-color: #10b981;
+}
+
+/* ========================================
+   Example 2: Casino Gold Theme
+   ======================================== */
+/*
+.toplist-playground .operator-column-ranking-v2 {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.5);
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2 {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.5);
+}
+
+.toplist-playground .operator-item {
+    border-color: #fef3c7;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.toplist-playground .operator-item:hover {
+    border-color: #fbbf24;
+}
+
+.toplist-playground .attribute-list-item:before {
+    color: #f59e0b;
+}
+*/
+
+/* ========================================
+   Example 3: Minimal Black & White
+   ======================================== */
+/*
+.toplist-playground .operator-item {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.toplist-playground .operator-item:hover {
+    border-color: #111827;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toplist-playground .operator-column-ranking-v2 {
+    background: #111827;
+    color: white;
+    border-radius: 6px;
+    box-shadow: none;
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2 {
+    background: #111827;
+    box-shadow: none;
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2:hover {
+    background: #1f2937;
+}
+*/
+
+/* ========================================
+   Example 4: Larger Cards with More Spacing
+   ======================================== */
+/*
+.toplist-playground .operator-item {
+    margin: 30px 0;
+    padding: 30px;
+    border-radius: 24px;
+}
+
+.toplist-playground .operator-column-ranking-v2 {
+    font-size: 36px;
+    min-width: 50px;
+    padding: 12px 16px;
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2 {
+    padding: 16px 32px;
+    font-size: 18px;
+}
+*/
+
+/* ========================================
+   Example 5: Hide Specific Elements Globally
+   ======================================== */
+/*
+.toplist-playground .operator-established-year-v2 {
+    display: none;
+}
+
+.toplist-playground .more_info_button {
+    display: none;
+}
+*/
+
+/* ========================================
+   Example 6: Custom Font Sizes
+   ======================================== */
+/*
+.toplist-playground .offer-description {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.toplist-playground .attribute-list-item {
+    font-size: 15px;
+}
+
+.toplist-playground .terms-and-conditions {
+    font-size: 13px;
+}
+*/
+
+/* ========================================
+   Example 7: Remove All Shadows (Flat Design)
+   ======================================== */
+/*
+.toplist-playground .operator-item {
+    box-shadow: none;
+}
+
+.toplist-playground .operator-column-ranking-v2 {
+    box-shadow: none;
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2 {
+    box-shadow: none;
+}
+
+.toplist-playground .op-logo {
+    box-shadow: none;
+}
+*/
+
+/* ========================================
+   Example 8: Custom Hover Effects
+   ======================================== */
+/*
+.toplist-playground .operator-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.toplist-playground .operator-playnow-column-v2 .button-blue-v2:hover {
+    transform: scale(1.05);
+}
+*/
