@@ -96,88 +96,178 @@ function toplist_settings_page()
         <hr>
 
         <h2>Quick Theme Examples</h2>
-        <p>Copy and paste one of these themes into the Global CSS field above:</p>
+        <p>Click a theme to apply it to the Global CSS field. You can also generate a theme using your own colours.</p>
 
-        <details style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <summary style="cursor: pointer; font-weight: 600; font-size: 15px;">🟢 Green Theme</summary>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; margin-top: 10px;"><code>.toplist .operator-column-ranking-v2 {
-                                                                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                                }
+        <div id="toplist-theme-tools" style="display:grid; gap:16px; max-width: 900px;">
 
-                                                                .toplist .operator-playnow-column-v2 .button-blue-v2 {
-                                                                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                                }
+            <!-- Theme buttons -->
+            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                <button type="button" class="button toplist-theme-btn"
+                    data-css=".toplist .operator-column-ranking-v2{background:linear-gradient(135deg,#10b981 0%,#059669 100%);} .toplist .operator-playnow-column-v2 .button-blue-v2{background:linear-gradient(135deg,#10b981 0%,#059669 100%);} .toplist .operator-item:hover{border-color:#10b981;}">
+                    🟢 Apply Green
+                </button>
 
-                                                                .toplist .operator-item:hover {
-                                                                    border - color: #10b981;
-                                }</code></pre>
-        </details>
+                <button type="button" class="button toplist-theme-btn"
+                    data-css=".toplist .operator-column-ranking-v2{background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);} .toplist .operator-playnow-column-v2 .button-blue-v2{background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);} .toplist .operator-item:hover{border-color:#fbbf24;}">
+                    🟠 Apply Orange/Gold
+                </button>
 
-        <details style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <summary style="cursor: pointer; font-weight: 600; font-size: 15px;">🟠 Orange/Gold Theme</summary>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; margin-top: 10px;"><code>.toplist .operator-column-ranking-v2 {
-                                                                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-                                }
+                <button type="button" class="button toplist-theme-btn"
+                    data-css=".toplist .operator-column-ranking-v2{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);} .toplist .operator-playnow-column-v2 .button-blue-v2{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);} .toplist .operator-item:hover{border-color:#f87171;}">
+                    🔴 Apply Red/Pink
+                </button>
 
-                                                                .toplist .operator-playnow-column-v2 .button-blue-v2 {
-                                                                    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-                                }
+                <button type="button" class="button toplist-theme-btn"
+                    data-css=".toplist .operator-column-ranking-v2{background:linear-gradient(135deg,#14b8a6 0%,#0d9488 100%);} .toplist .operator-playnow-column-v2 .button-blue-v2{background:linear-gradient(135deg,#14b8a6 0%,#0d9488 100%);} .toplist .operator-item:hover{border-color:#5eead4;}">
+                    🌊 Apply Teal/Cyan
+                </button>
 
-                                                                .toplist .operator-item:hover {
-                                                                    border - color: #fbbf24;
-                                }</code></pre>
-        </details>
+                <button type="button" class="button toplist-theme-btn"
+                    data-css=".toplist .operator-item{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-color:#334155;color:#e2e8f0;} .toplist .offer-description{color:#f1f5f9;} .toplist .more-info-table{background:#0f172a;} .toplist .attribute-list-item{color:#cbd5e1;}">
+                    🌙 Apply Dark Mode
+                </button>
 
-        <details style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <summary style="cursor: pointer; font-weight: 600; font-size: 15px;">🔴 Red/Pink Theme</summary>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; margin-top: 10px;"><code>.toplist .operator-column-ranking-v2 {
-                                                                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-                                }
+                <button type="button" class="button" id="toplist-clear-css">
+                    Clear
+                </button>
+            </div>
 
-                                                                .toplist .operator-playnow-column-v2 .button-blue-v2 {
-                                                                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-                                }
+            <!-- Colour picker generator -->
+            <div style="border:1px solid #ddd; border-radius:8px; padding:16px;">
+                <h3 style="margin-top:0;">Build your own colours</h3>
 
-                                                                .toplist .operator-item:hover {
-                                                                    border - color: #f87171;
-                                }</code></pre>
-        </details>
+                <div style="display:grid; grid-template-columns: repeat(5, minmax(140px, 1fr)); gap:12px; align-items:end;">
+                    <label style="display:grid; gap:6px;">
+                        <span>Primary</span>
+                        <input type="color" id="toplist-color-primary" value="#10b981">
+                    </label>
 
-        <details style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <summary style="cursor: pointer; font-weight: 600; font-size: 15px;">🌊 Teal/Cyan Theme</summary>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; margin-top: 10px;"><code>.toplist .operator-column-ranking-v2 {
-                                                                background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-                                }
+                    <label style="display:grid; gap:6px;">
+                        <span>Secondary</span>
+                        <input type="color" id="toplist-color-secondary" value="#059669">
+                    </label>
 
-                                                                .toplist .operator-playnow-column-v2 .button-blue-v2 {
-                                                                    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-                                }
+                    <label style="display:grid; gap:6px;">
+                        <span>Hover Border</span>
+                        <input type="color" id="toplist-color-hover" value="#10b981">
+                    </label>
 
-                                                                .toplist .operator-item:hover {
-                                                                    border - color: #5eead4;
-                                }</code></pre>
-        </details>
+                    <label style="display:grid; gap:6px;">
+                        <span>Card BG</span>
+                        <input type="color" id="toplist-color-cardbg" value="#ffffff">
+                    </label>
 
-        <details style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <summary style="cursor: pointer; font-weight: 600; font-size: 15px;">🌙 Dark Mode</summary>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; margin-top: 10px;"><code>.toplist .operator-item {
-                                                                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-                                                                border-color: #334155;
-                                                                color: #e2e8f0;
-                                }
+                    <label style="display:grid; gap:6px;">
+                        <span>Text</span>
+                        <input type="color" id="toplist-color-text" value="#0f172a">
+                    </label>
+                </div>
 
-                                                                .toplist .offer-description {
-                                                                    color: #f1f5f9;
-                                }
+                <div style="display:flex; gap:10px; margin-top:12px; align-items:center;">
+                    <button type="button" class="button button-primary" id="toplist-apply-custom">
+                        Apply Custom Colours
+                    </button>
 
-                                                                .toplist .more-info-table {
-                                                                    background: #0f172a;
-                                }
+                    <label style="display:flex; gap:8px; align-items:center;">
+                        <input type="checkbox" id="toplist-append-mode" checked>
+                        Append instead of replace
+                    </label>
 
-                                                                .toplist .attribute-list-item {
-                                                                    color: #cbd5e1;
-                                }</code></pre>
-        </details>
+                    <span id="toplist-theme-msg" style="opacity:.8;"></span>
+                </div>
+
+                <p class="description" style="margin-bottom:0;">
+                    This will generate a simple gradient badge + gradient button + hover border, and optionally set card
+                    background/text.
+                </p>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                const textarea = document.getElementById('toplist_global_css');
+                if (!textarea) return;
+
+                const msg = document.getElementById('toplist-theme-msg');
+                const appendBox = document.getElementById('toplist-append-mode');
+
+                function setMessage(text) {
+                    if (!msg) return;
+                    msg.textContent = text;
+                    window.clearTimeout(setMessage._t);
+                    setMessage._t = window.setTimeout(() => msg.textContent = '', 2500);
+                }
+
+                function applyCss(css, { append = false } = {}) {
+                    const trimmed = css.trim();
+                    if (!trimmed) return;
+
+                    if (append && textarea.value.trim()) {
+                        textarea.value = textarea.value.replace(/\s+$/, '') + "\n\n" + trimmed + "\n";
+                    } else {
+                        textarea.value = trimmed + "\n";
+                    }
+                    textarea.focus();
+                    setMessage(append ? 'Appended CSS ✅' : 'Applied CSS ✅');
+                }
+
+                // Click-to-apply themes
+                document.querySelectorAll('.toplist-theme-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const css = btn.getAttribute('data-css') || '';
+                        applyCss(css, { append: false });
+                    });
+                });
+
+                // Clear button
+                const clearBtn = document.getElementById('toplist-clear-css');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => {
+                        textarea.value = '';
+                        setMessage('Cleared ✅');
+                        textarea.focus();
+                    });
+                }
+
+                // Custom colour generator
+                function val(id) {
+                    const el = document.getElementById(id);
+                    return el ? el.value : '';
+                }
+
+                const applyCustomBtn = document.getElementById('toplist-apply-custom');
+                if (applyCustomBtn) {
+                    applyCustomBtn.addEventListener('click', () => {
+                        const primary = val('toplist-color-primary');
+                        const secondary = val('toplist-color-secondary');
+                        const hover = val('toplist-color-hover');
+                        const cardbg = val('toplist-color-cardbg');
+                        const text = val('toplist-color-text');
+
+                        // Keep it simple + safe: generate only the selectors you already documented.
+                        const css =
+                            `.toplist .operator-column-ranking-v2{
+        background: linear-gradient(135deg, ${primary} 0%, ${secondary} 100%);
+        }
+
+        .toplist .operator-playnow-column-v2 .button-blue-v2{
+        background: linear-gradient(135deg, ${primary} 0%, ${secondary} 100%);
+        }
+
+        .toplist .operator-item:hover{
+        border-color: ${hover};
+        }
+
+        .toplist .operator-item{
+        background: ${cardbg};
+        color: ${text};
+        }`;
+
+                        applyCss(css, { append: !!appendBox && appendBox.checked });
+                    });
+                }
+            })();
+        </script>
 
         <hr>
 
@@ -224,7 +314,7 @@ function toplist_settings_page()
 // Output global CSS in frontend and editor
 // Enqueue global CSS using wp_add_inline_style
 add_action('enqueue_block_assets', function () {
-    $global_css = get_option('toplist_playground_global_css', '');
+    $global_css = get_option('toplist_global_css', '');
     if ($global_css === '')
         return;
 

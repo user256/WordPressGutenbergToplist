@@ -22,7 +22,7 @@ Settings → Toplist Block
 Example:
 `Mr Vegas|Mr Vegas Casino|100% Bonus|https://example.com|https://via.placeholder.com/150|2020|Visit|T&Cs|Fast payouts;Good slots`
 
-## LIke it?
+## Like it?
 If this helped you, you can buy me a coffee/dram:
 paypal.me/user256 
 
