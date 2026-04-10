@@ -240,18 +240,30 @@ function toplist_parse_lines_to_items($text, $defaults = array())
 
 	$header_parts = explode('|', $lines[0]);
 	$header_tokens = array_map('toplist_normalize_directive_token', $header_parts);
-	$has_header = toplist_detect_header_row($header_parts);
+	$file_header = toplist_detect_header_row($header_parts);
 
-	// If content has no header row, optionally apply a default header schema.
-	if (!$has_header && $default_header_row !== '') {
-		$header_parts = explode('|', $default_header_row);
-		$header_tokens = array_map('toplist_normalize_directive_token', $header_parts);
+	if ($file_header) {
 		$has_header = true;
+		$start_index = 1;
+	} elseif ($default_header_row !== '') {
+		$default_header_parts = explode('|', $default_header_row);
+		$first_line_parts = explode('|', $lines[0]);
+		// Wide rows are full fixed-column pipe data: do not apply a short virtual header (would drop columns).
+		if (count($first_line_parts) <= count($default_header_parts)) {
+			$header_parts = $default_header_parts;
+			$header_tokens = array_map('toplist_normalize_directive_token', $header_parts);
+			$has_header = true;
+			$start_index = 0;
+		} else {
+			$has_header = false;
+			$start_index = 0;
+		}
+	} else {
+		$has_header = false;
 		$start_index = 0;
 	}
 
 	if ($has_header) {
-		$start_index = 1;
 		foreach ($header_tokens as $token) {
 			if (!$token['recognized']) {
 				continue;
@@ -340,6 +352,257 @@ function toplist_parse_lines_to_items($text, $defaults = array())
 		'includes' => array_values(array_unique($includes)),
 		'excludes' => array_values(array_unique($excludes)),
 	);
+}
+
+/**
+ * Normalize external toplist JSON list fields (e.g. features, payments).
+ *
+ * @param mixed $value Raw value.
+ * @return array
+ */
+function toplist_external_json_string_list($value)
+{
+	if (is_array($value)) {
+		return array_values(array_filter(array_map('toplist_clean_text', $value)));
+	}
+	if (is_string($value)) {
+		$t = trim($value);
+		return $t !== '' ? array($t) : array();
+	}
+	return array();
+}
+
+/**
+ * Normalize games from external JSON (array or space-separated string).
+ *
+ * @param mixed $value Raw value.
+ * @return array
+ */
+function toplist_external_json_games_to_list($value)
+{
+	if (is_array($value)) {
+		return array_values(array_filter(array_map('toplist_clean_text', $value)));
+	}
+	if (is_string($value)) {
+		return array_values(array_filter(preg_split('/\s+/', trim($value))));
+	}
+	return array();
+}
+
+/**
+ * Normalize withdrawals from external JSON.
+ *
+ * @param mixed $value Raw value.
+ * @return array
+ */
+function toplist_external_json_withdrawals_list($value)
+{
+	if (is_array($value)) {
+		return toplist_external_json_string_list($value);
+	}
+	$s = toplist_clean_text($value);
+	if ($s === '') {
+		return array();
+	}
+	if (strpos($s, ';') !== false) {
+		return toplist_clean_list($s);
+	}
+	return array($s);
+}
+
+/**
+ * Map one external JSON row (toplist.json shape) to an internal item.
+ *
+ * @param array $row Decoded object.
+ * @return array|null Item or null if empty.
+ */
+function toplist_external_json_row_to_item($row)
+{
+	if (!is_array($row)) {
+		return null;
+	}
+
+	$name = toplist_clean_text($row['name'] ?? '');
+	$visit = toplist_clean_text($row['visit_link'] ?? '');
+	$bonus_link = toplist_clean_text($row['bonus_link'] ?? '');
+	$href = $visit !== '' ? $visit : $bonus_link;
+
+	$item = array(
+		'operator' => $name,
+		'product' => $name,
+		'offer' => toplist_clean_text($row['bonus'] ?? ''),
+		'href' => $href,
+		'logo' => toplist_clean_text($row['image_url'] ?? ''),
+		'year' => toplist_clean_text($row['launched'] ?? ''),
+		'ctaText' => '',
+		'terms' => '',
+		'bullets' => toplist_external_json_string_list($row['features'] ?? array()),
+		'payout' => toplist_clean_text($row['payout_time'] ?? ''),
+		'code' => toplist_clean_text($row['code'] ?? ''),
+		'rating' => isset($row['rating']) && (is_numeric($row['rating']) || is_string($row['rating']))
+			? toplist_clean_text((string) $row['rating'])
+			: '',
+		'regulator' => toplist_clean_text($row['regulator'] ?? ''),
+		'payments' => toplist_external_json_string_list($row['payments'] ?? array()),
+		'games' => toplist_external_json_games_to_list($row['games'] ?? ''),
+		'liveGames' => toplist_clean_text($row['live_games'] ?? ''),
+		'smallPrint' => '',
+		'readReviewHref' => toplist_clean_text($row['review_link'] ?? ''),
+		'readReviewText' => '',
+		'withdrawals' => toplist_external_json_withdrawals_list($row['withdrawals'] ?? ''),
+	);
+
+	$default_cta = 'Visit';
+	$default_rr = 'Read Review';
+	$item['ctaText'] = trim((string) $item['ctaText']) !== '' ? $item['ctaText'] : $default_cta;
+	$item['readReviewText'] = trim((string) $item['readReviewText']) !== '' ? $item['readReviewText'] : $default_rr;
+
+	return toplist_item_has_content($item) ? $item : null;
+}
+
+/**
+ * Decode external toplist.json body into internal items.
+ *
+ * @param string $json_string Raw JSON.
+ * @return array{items:array,error:string}
+ */
+function toplist_decode_external_toplist_json($json_string)
+{
+	$json_string = is_string($json_string) ? trim($json_string) : '';
+	$json_string = preg_replace('/^\xEF\xBB\xBF/', '', $json_string);
+	if ($json_string === '') {
+		return array(
+			'items' => array(),
+			'error' => 'empty',
+		);
+	}
+
+	$decoded = json_decode($json_string, true);
+	if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+		return array(
+			'items' => array(),
+			'error' => 'invalid',
+		);
+	}
+
+	$items = array();
+	foreach ($decoded as $row) {
+		$item = toplist_external_json_row_to_item($row);
+		if ($item !== null) {
+			$items[] = $item;
+		}
+	}
+
+	if (empty($items)) {
+		return array(
+			'items' => array(),
+			'error' => 'empty',
+		);
+	}
+
+	return array(
+		'items' => $items,
+		'error' => '',
+	);
+}
+
+/**
+ * Serialize internal items to pipe-delimited post content (no header row).
+ *
+ * @param array $items Normalized items.
+ * @param array $defaults Optional default CTA / read-review labels.
+ * @return string
+ */
+function toplist_items_to_pipe_content($items, $defaults = array())
+{
+	$default_cta = trim((string) ($defaults['defaultCtaText'] ?? 'Visit'));
+	$default_read = trim((string) ($defaults['defaultReadReviewText'] ?? 'Read Review'));
+	$default_cta = $default_cta !== '' ? $default_cta : 'Visit';
+	$default_read = $default_read !== '' ? $default_read : 'Read Review';
+
+	$lines = array();
+	foreach ($items as $it) {
+		if (!is_array($it)) {
+			continue;
+		}
+		$parts = array(
+			toplist_clean_text($it['operator'] ?? ''),
+			toplist_clean_text($it['product'] ?? ''),
+			toplist_clean_text($it['offer'] ?? ''),
+			toplist_clean_text($it['href'] ?? ''),
+			toplist_clean_text($it['logo'] ?? ''),
+			toplist_clean_text($it['year'] ?? ''),
+			toplist_clean_text($it['ctaText'] ?? '') !== '' ? toplist_clean_text($it['ctaText'] ?? '') : $default_cta,
+			toplist_clean_text($it['terms'] ?? ''),
+			implode(';', toplist_clean_list($it['bullets'] ?? array())),
+			toplist_clean_text($it['payout'] ?? ''),
+			toplist_clean_text($it['code'] ?? ''),
+			toplist_clean_text($it['rating'] ?? ''),
+			toplist_clean_text($it['regulator'] ?? ''),
+			implode(';', toplist_clean_list($it['payments'] ?? array())),
+			implode(';', toplist_clean_list($it['games'] ?? array())),
+			toplist_clean_text($it['liveGames'] ?? ''),
+			toplist_clean_text($it['smallPrint'] ?? ''),
+			toplist_clean_text($it['readReviewHref'] ?? ''),
+			toplist_clean_text($it['readReviewText'] ?? '') !== '' ? toplist_clean_text($it['readReviewText'] ?? '') : $default_read,
+			implode(';', toplist_clean_list($it['withdrawals'] ?? array())),
+		);
+		$lines[] = implode('|', $parts);
+	}
+
+	return implode("\n", $lines);
+}
+
+/**
+ * Build export rows matching repository toplist.json schema.
+ *
+ * @param array $items Normalized items.
+ * @return array
+ */
+function toplist_items_to_external_json_rows($items)
+{
+	$rows = array();
+	$pos = 1;
+
+	foreach ($items as $item) {
+		if (!is_array($item)) {
+			continue;
+		}
+
+		$href = toplist_clean_text($item['href'] ?? '');
+		$games = toplist_clean_list($item['games'] ?? array());
+		$withdrawals = toplist_clean_list($item['withdrawals'] ?? array());
+		$rating_raw = toplist_clean_text(is_scalar($item['rating'] ?? '') ? (string) $item['rating'] : '');
+		$rating_out = null;
+		if ($rating_raw !== '') {
+			$rating_out = is_numeric($rating_raw) ? (float) $rating_raw : $rating_raw;
+		}
+
+		$review = toplist_clean_text($item['readReviewHref'] ?? '');
+
+		$rows[] = array(
+			'position' => (string) $pos,
+			'name' => toplist_clean_text($item['product'] ?? '') !== '' ? toplist_clean_text($item['product'] ?? '') : toplist_clean_text($item['operator'] ?? ''),
+			'rating' => $rating_out,
+			'launched' => toplist_clean_text($item['year'] ?? ''),
+			'regulator' => toplist_clean_text($item['regulator'] ?? ''),
+			'bonus' => toplist_clean_text($item['offer'] ?? ''),
+			'bonus_link' => $href !== '' ? $href : null,
+			'payout_time' => toplist_clean_text($item['payout'] ?? ''),
+			'features' => toplist_clean_list($item['bullets'] ?? array()),
+			'games' => implode(' ', $games),
+			'live_games' => toplist_clean_text($item['liveGames'] ?? ''),
+			'withdrawals' => !empty($withdrawals) ? implode(' ', $withdrawals) : '',
+			'code' => toplist_clean_text($item['code'] ?? ''),
+			'image_url' => toplist_clean_text($item['logo'] ?? ''),
+			'visit_link' => null,
+			'review_link' => $review !== '' ? $review : null,
+			'payments' => toplist_clean_list($item['payments'] ?? array()),
+		);
+		$pos += 1;
+	}
+
+	return $rows;
 }
 
 /**
@@ -530,40 +793,85 @@ function toplist_render_raw_content_metabox($post)
 }
 
 /**
- * Render CSV import/export metabox for a single toplist.
+ * Render CSV / JSON import/export metabox for a single toplist.
  *
  * @param WP_Post $post Current post.
  * @return void
  */
 function toplist_render_csv_tools_metabox($post)
 {
+	$pid = (int) $post->ID;
 	$export_url = wp_nonce_url(
-		admin_url('admin-post.php?action=toplist_export_csv&post_id=' . (int) $post->ID),
-		'toplist_export_csv_' . (int) $post->ID
+		admin_url('admin-post.php?action=toplist_export_csv&post_id=' . $pid),
+		'toplist_export_csv_' . $pid
 	);
-	$import_action = admin_url('admin-post.php');
-	$action_id = 'toplist-import-action-' . (int) $post->ID;
-	$post_id_input = 'toplist-import-postid-' . (int) $post->ID;
-	$nonce_id = 'toplist-import-nonce-' . (int) $post->ID;
-	$file_id = 'toplist-import-file-' . (int) $post->ID;
-	$button_id = 'toplist-import-button-' . (int) $post->ID;
+	$export_json_url = wp_nonce_url(
+		admin_url('admin-post.php?action=toplist_export_json&post_id=' . $pid),
+		'toplist_export_json_' . $pid
+	);
+	$csv_form_id = 'toplist-import-csv-form-' . $pid;
+	$json_form_id = 'toplist-import-json-form-' . $pid;
+	$file_id = 'toplist-import-file-' . $pid;
+	$json_file_id = 'toplist-json-import-file-' . $pid;
+	$csv_btn_id = 'toplist-import-submit-csv-' . $pid;
+	$json_btn_id = 'toplist-import-submit-json-' . $pid;
 
-	echo '<p><a class="button button-secondary" href="' . esc_url($export_url) . '">' . esc_html__('Export This Toplist as CSV', 'toplist') . '</a></p>';
-	echo '<hr>';
-	echo '<input type="hidden" id="' . esc_attr($action_id) . '" name="action" value="toplist_import_csv" disabled>';
-	echo '<input type="hidden" id="' . esc_attr($post_id_input) . '" name="post_id" value="' . esc_attr((string) $post->ID) . '" disabled>';
-	echo '<input type="hidden" id="' . esc_attr($nonce_id) . '" name="toplist_import_csv_nonce" value="' . esc_attr(wp_create_nonce('toplist_import_csv_' . (int) $post->ID)) . '" disabled>';
-	echo '<p><label for="toplist_csv_file"><strong>' . esc_html__('Import CSV into this toplist', 'toplist') . '</strong></label></p>';
-	echo '<input type="file" id="' . esc_attr($file_id) . '" name="toplist_csv_file" accept=".csv,text/csv">';
-	echo '<p style="margin-top:10px;"><button type="submit" id="' . esc_attr($button_id) . '" class="button button-primary" formmethod="post" formaction="' . esc_url($import_action) . '" formenctype="multipart/form-data" formnovalidate>' . esc_html__('Import CSV', 'toplist') . '</button></p>';
-	echo '<p class="description">' . esc_html__('CSV header can use existing field names: operator, product, offer, href, logo, year, ctaText, terms, bullets, payout, code, rating, regulator, payments, games, liveGames, smallPrint, readReviewHref, readReviewText, withdrawals.', 'toplist') . '</p>';
-	echo '<script>(function(){';
-	echo 'var btn=document.getElementById(' . wp_json_encode($button_id) . ');';
-	echo 'var action=document.getElementById(' . wp_json_encode($action_id) . ');';
-	echo 'var postId=document.getElementById(' . wp_json_encode($post_id_input) . ');';
-	echo 'var nonce=document.getElementById(' . wp_json_encode($nonce_id) . ');';
-	echo 'if(!btn||!action||!postId){return;}';
-	echo 'btn.addEventListener("click",function(){action.disabled=false;postId.disabled=false;if(nonce){nonce.disabled=false;}});';
+	echo '<p><strong>' . esc_html__('CSV', 'toplist') . '</strong></p>';
+	echo '<p><a class="button button-secondary" href="' . esc_url($export_url) . '">' . esc_html__('Export as CSV', 'toplist') . '</a></p>';
+	echo '<p><label for="' . esc_attr($file_id) . '"><strong>' . esc_html__('Import CSV', 'toplist') . '</strong></label></p>';
+	echo '<input type="file" id="' . esc_attr($file_id) . '" name="toplist_csv_file" form="' . esc_attr($csv_form_id) . '" accept=".csv,text/csv" />';
+	echo '<p style="margin-top:10px;"><button type="button" class="button button-primary" id="' . esc_attr($csv_btn_id) . '">' . esc_html__('Import CSV', 'toplist') . '</button></p>';
+	echo '<p class="description">' . esc_html__('CSV header can use field names: operator, product, offer, href, logo, year, ctaText, terms, bullets, payout, code, rating, regulator, payments, games, liveGames, smallPrint, readReviewHref, readReviewText, withdrawals.', 'toplist') . '</p>';
+
+	echo '<hr><p><strong>' . esc_html__('JSON (toplist.json)', 'toplist') . '</strong></p>';
+	echo '<p><a class="button button-secondary" href="' . esc_url($export_json_url) . '">' . esc_html__('Export as JSON', 'toplist') . '</a></p>';
+	echo '<p><label for="' . esc_attr($json_file_id) . '"><strong>' . esc_html__('Import JSON', 'toplist') . '</strong></label></p>';
+	echo '<input type="file" id="' . esc_attr($json_file_id) . '" name="toplist_json_file" form="' . esc_attr($json_form_id) . '" accept=".json,application/json" />';
+	echo '<p style="margin-top:10px;"><button type="button" class="button button-primary" id="' . esc_attr($json_btn_id) . '">' . esc_html__('Import JSON', 'toplist') . '</button></p>';
+	echo '<p class="description">' . esc_html__('Array of objects: name, rating, launched, regulator, bonus, bonus_link, payout_time, features, games, live_games, withdrawals, code, image_url, visit_link, review_link, payments (see repo toplist/toplist.json).', 'toplist') . '</p>';
+}
+
+/**
+ * Print import &lt;form&gt; tags outside #post (valid HTML; metabox controls use form="…").
+ *
+ * @return void
+ */
+function toplist_print_import_forms_in_footer()
+{
+	if (!is_admin()) {
+		return;
+	}
+	$screen = function_exists('get_current_screen') ? get_current_screen() : null;
+	if (!$screen || $screen->base !== 'post' || $screen->post_type !== 'toplist_list') {
+		return;
+	}
+	global $post;
+	if (!$post instanceof WP_Post || $post->post_type !== 'toplist_list') {
+		return;
+	}
+	$pid = (int) $post->ID;
+	$action = esc_url(admin_url('admin-post.php'));
+	$csv_id = 'toplist-import-csv-form-' . $pid;
+	$json_id = 'toplist-import-json-form-' . $pid;
+
+	echo '<div class="toplist-import-forms" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">';
+	echo '<form id="' . esc_attr($csv_id) . '" method="post" action="' . $action . '" enctype="multipart/form-data">';
+	wp_nonce_field('toplist_import_csv_' . $pid, 'toplist_import_csv_nonce');
+	echo '<input type="hidden" name="action" value="toplist_import_csv" />';
+	echo '<input type="hidden" name="post_id" value="' . esc_attr((string) $pid) . '" />';
+	echo '</form>';
+	echo '<form id="' . esc_attr($json_id) . '" method="post" action="' . $action . '" enctype="multipart/form-data">';
+	wp_nonce_field('toplist_import_json_' . $pid, 'toplist_import_json_nonce');
+	echo '<input type="hidden" name="action" value="toplist_import_json" />';
+	echo '<input type="hidden" name="post_id" value="' . esc_attr((string) $pid) . '" />';
+	echo '</form>';
+	echo '</div>';
+	$msg_csv = wp_json_encode(__('Choose a CSV file first.', 'toplist'));
+	$msg_json = wp_json_encode(__('Choose a JSON file first.', 'toplist'));
+	echo '<script>(function(){var p=' . (int) $pid . ';var $=function(i){return document.getElementById(i);};';
+	echo 'var cf=$("toplist-import-csv-form-"+p),jf=$("toplist-import-json-form-"+p),cb=$("toplist-import-submit-csv-"+p),jb=$("toplist-import-submit-json-"+p),ci=$("toplist-import-file-"+p),ji=$("toplist-json-import-file-"+p);';
+	echo 'if(cb&&cf){cb.addEventListener("click",function(){if(!ci||!ci.files||!ci.files.length){window.alert(' . $msg_csv . ');return;}cf.submit();});}';
+	echo 'if(jb&&jf){jb.addEventListener("click",function(){if(!ji||!ji.files||!ji.files.length){window.alert(' . $msg_json . ');return;}jf.submit();});}';
 	echo '})();</script>';
 }
 
@@ -654,7 +962,7 @@ function toplist_register_toplist_metaboxes()
 
 	add_meta_box(
 		'toplist_csv_tools_box',
-		__('CSV Import / Export', 'toplist'),
+		__('Import / Export', 'toplist'),
 		'toplist_render_csv_tools_metabox',
 		'toplist_list',
 		'side',
@@ -760,6 +1068,82 @@ function toplist_handle_export_csv()
 		fputcsv($out, $row);
 	}
 	fclose($out);
+	exit;
+}
+
+/**
+ * Export one saved toplist as JSON (toplist.json schema).
+ *
+ * @return void
+ */
+function toplist_handle_export_json()
+{
+	$post_id = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
+	if (!$post_id || !current_user_can('edit_post', $post_id)) {
+		wp_die(esc_html__('You do not have permission to export this toplist.', 'toplist'));
+	}
+	check_admin_referer('toplist_export_json_' . $post_id);
+
+	$post = get_post($post_id);
+	if (!$post || $post->post_type !== 'toplist_list') {
+		wp_die(esc_html__('Toplist not found.', 'toplist'));
+	}
+
+	$parsed = toplist_parse_lines_to_items((string) $post->post_content, array());
+	$items = is_array($parsed['items'] ?? null) ? $parsed['items'] : array();
+	$rows = toplist_items_to_external_json_rows($items);
+
+	nocache_headers();
+	header('Content-Type: application/json; charset=utf-8');
+	header('Content-Disposition: attachment; filename=toplist-' . $post_id . '.json');
+
+	echo wp_json_encode($rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	exit;
+}
+
+/**
+ * Import JSON (toplist.json schema) into one saved toplist.
+ *
+ * @return void
+ */
+function toplist_handle_import_json()
+{
+	$post_id = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
+	if (!$post_id || !current_user_can('edit_post', $post_id)) {
+		wp_die(esc_html__('You do not have permission to import into this toplist.', 'toplist'));
+	}
+	if (!isset($_POST['toplist_import_json_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['toplist_import_json_nonce'])), 'toplist_import_json_' . $post_id)) {
+		wp_die(esc_html__('Invalid JSON import request.', 'toplist'));
+	}
+	if (empty($_FILES['toplist_json_file']['tmp_name'])) {
+		wp_safe_redirect(add_query_arg('toplist_json_import', 'empty', get_edit_post_link($post_id, '')));
+		exit;
+	}
+
+	$tmp = $_FILES['toplist_json_file']['tmp_name'];
+	$raw = file_get_contents($tmp);
+	if ($raw === false) {
+		wp_safe_redirect(add_query_arg('toplist_json_import', 'failed', get_edit_post_link($post_id, '')));
+		exit;
+	}
+
+	$result = toplist_decode_external_toplist_json($raw);
+	if ($result['error'] === 'invalid') {
+		wp_safe_redirect(add_query_arg('toplist_json_import', 'invalid', get_edit_post_link($post_id, '')));
+		exit;
+	}
+	if ($result['error'] === 'empty') {
+		wp_safe_redirect(add_query_arg('toplist_json_import', 'empty', get_edit_post_link($post_id, '')));
+		exit;
+	}
+
+	$new_content = toplist_items_to_pipe_content($result['items'], array());
+	wp_update_post(array(
+		'ID' => $post_id,
+		'post_content' => $new_content,
+	));
+
+	wp_safe_redirect(add_query_arg('toplist_json_import', 'success', get_edit_post_link($post_id, '')));
 	exit;
 }
 
@@ -1211,25 +1595,47 @@ function toplist_import_admin_notice()
 		return;
 	}
 	$status = isset($_GET['toplist_import']) ? sanitize_key((string) $_GET['toplist_import']) : '';
-	if ($status === '') {
-		return;
+
+	if ($status !== '') {
+		$message = '';
+		$class = 'notice notice-info';
+		if ($status === 'success') {
+			$message = __('CSV imported successfully.', 'toplist');
+			$class = 'notice notice-success';
+		} elseif ($status === 'empty') {
+			$message = __('CSV import failed: file was empty or invalid.', 'toplist');
+			$class = 'notice notice-warning';
+		} elseif ($status === 'failed') {
+			$message = __('CSV import failed: unable to read the uploaded file.', 'toplist');
+			$class = 'notice notice-error';
+		}
+
+		if ($message !== '') {
+			echo '<div class="' . esc_attr($class) . '"><p>' . esc_html($message) . '</p></div>';
+		}
 	}
 
-	$message = '';
-	$class = 'notice notice-info';
-	if ($status === 'success') {
-		$message = __('CSV imported successfully.', 'toplist');
-		$class = 'notice notice-success';
-	} elseif ($status === 'empty') {
-		$message = __('CSV import failed: file was empty or invalid.', 'toplist');
-		$class = 'notice notice-warning';
-	} elseif ($status === 'failed') {
-		$message = __('CSV import failed: unable to read the uploaded file.', 'toplist');
-		$class = 'notice notice-error';
-	}
+	$json_status = isset($_GET['toplist_json_import']) ? sanitize_key((string) $_GET['toplist_json_import']) : '';
+	if ($json_status !== '') {
+		$json_message = '';
+		$json_class = 'notice notice-info';
+		if ($json_status === 'success') {
+			$json_message = __('JSON imported successfully.', 'toplist');
+			$json_class = 'notice notice-success';
+		} elseif ($json_status === 'empty') {
+			$json_message = __('JSON import failed: file was empty or no valid rows.', 'toplist');
+			$json_class = 'notice notice-warning';
+		} elseif ($json_status === 'failed') {
+			$json_message = __('JSON import failed: unable to read the uploaded file.', 'toplist');
+			$json_class = 'notice notice-error';
+		} elseif ($json_status === 'invalid') {
+			$json_message = __('JSON import failed: invalid JSON (expected a JSON array).', 'toplist');
+			$json_class = 'notice notice-error';
+		}
 
-	if ($message !== '') {
-		echo '<div class="' . esc_attr($class) . '"><p>' . esc_html($message) . '</p></div>';
+		if ($json_message !== '') {
+			echo '<div class="' . esc_attr($json_class) . '"><p>' . esc_html($json_message) . '</p></div>';
+		}
 	}
 }
 
@@ -1419,10 +1825,6 @@ function toplist_register_block()
 				'type' => 'string',
 				'default' => '',
 			),
-			'_lines' => array(
-				'type' => 'string',
-				'default' => '',
-			),
 		),
 	));
 }
@@ -1435,12 +1837,15 @@ add_action('rest_api_init', 'toplist_register_rest_routes');
 add_action('add_meta_boxes_toplist_list', 'toplist_register_toplist_metaboxes');
 add_action('save_post_toplist_list', 'toplist_save_toplist_raw_content');
 add_action('admin_post_toplist_export_csv', 'toplist_handle_export_csv');
+add_action('admin_post_toplist_export_json', 'toplist_handle_export_json');
 add_action('admin_post_toplist_export_all_csv', 'toplist_handle_export_all_csv');
 add_action('admin_post_toplist_export_bulk_template_csv', 'toplist_handle_export_bulk_template_csv');
 add_action('admin_post_toplist_import_csv', 'toplist_handle_import_csv');
+add_action('admin_post_toplist_import_json', 'toplist_handle_import_json');
 add_action('admin_post_toplist_import_all_csv', 'toplist_handle_import_all_csv');
 add_action('admin_notices', 'toplist_import_admin_notice');
 add_action('admin_enqueue_scripts', 'toplist_enqueue_toplist_admin_assets');
+add_action('admin_footer', 'toplist_print_import_forms_in_footer', 5);
 
 if (is_admin()) {
 	require_once __DIR__ . '/admin-diagnostics.php';
@@ -1459,7 +1864,7 @@ function toplist_render($attributes)
 	$block_default_header_row = isset($attributes['defaultHeaderRow']) ? trim((string) $attributes['defaultHeaderRow']) : '';
 	$heading_mode = isset($attributes['headingMode']) ? (string) $attributes['headingMode'] : 'global';
 	$block_heading_text = isset($attributes['headingText']) ? trim((string) $attributes['headingText']) : '';
-	$lines = isset($attributes['_lines']) ? (string) $attributes['_lines'] : '';
+	$lines = '';
 	$global_default_cta_text = toplist_get_global_text_option('toplist_global_default_cta_text', 'Visit');
 	$global_default_read_review_text = toplist_get_global_text_option('toplist_global_default_read_review_text', 'Read Review');
 	$global_default_cta_text = $global_default_cta_text !== '' ? $global_default_cta_text : 'Visit';

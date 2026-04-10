@@ -4,6 +4,7 @@
 
 	const useState = element.useState;
 	const useEffect = element.useEffect;
+	const useRef = element.useRef;
 	const useBlockProps = blockEditor.useBlockProps;
 	const InspectorControls = blockEditor.InspectorControls;
 
@@ -234,16 +235,29 @@
 		}
 
 		headerTokens = lines[0].split('|').map(normalizeDirectiveToken);
-		hasHeader = detectHeader(lines[0].split('|'));
+		var fileHeaderDetected = detectHeader(lines[0].split('|'));
 
-		if (!hasHeader && defaults.defaultHeaderRow.trim()) {
-			headerTokens = defaults.defaultHeaderRow.split('|').map(normalizeDirectiveToken);
+		if (fileHeaderDetected) {
 			hasHeader = true;
+			startIndex = 1;
+		} else if (defaults.defaultHeaderRow.trim()) {
+			var defaultHeaderParts = defaults.defaultHeaderRow.split('|');
+			var firstLineParts = lines[0].split('|');
+			// Wide rows are full fixed-column pipe data: do not apply a short virtual header (would drop columns).
+			if (firstLineParts.length <= defaultHeaderParts.length) {
+				headerTokens = defaultHeaderParts.map(normalizeDirectiveToken);
+				hasHeader = true;
+				startIndex = 0;
+			} else {
+				hasHeader = false;
+				startIndex = 0;
+			}
+		} else {
+			hasHeader = false;
 			startIndex = 0;
 		}
 
 		if (hasHeader) {
-			startIndex = 1;
 			for (i = 0; i < headerTokens.length; i += 1) {
 				if (!headerTokens[i].recognized) {
 					continue;
@@ -311,6 +325,162 @@
 		}).join('\n');
 	}
 
+	function externalJsonStringList(value) {
+		if (Array.isArray(value)) {
+			return value.map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+		}
+		if (typeof value === 'string') {
+			var t = value.trim();
+			return t ? [t] : [];
+		}
+		return [];
+	}
+
+	function gamesFromExternalJson(value) {
+		if (Array.isArray(value)) {
+			return value.map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+		}
+		if (typeof value === 'string') {
+			return value.trim().split(/\s+/).filter(Boolean);
+		}
+		return [];
+	}
+
+	function withdrawalsFromExternalJson(value) {
+		if (Array.isArray(value)) {
+			return externalJsonStringList(value);
+		}
+		if (typeof value === 'string') {
+			var s = value.trim();
+			if (!s) {
+				return [];
+			}
+			if (s.indexOf(';') !== -1) {
+				return splitList(s);
+			}
+			return [s];
+		}
+		return [];
+	}
+
+	function jsonRowToItem(row) {
+		if (!row || typeof row !== 'object') {
+			return null;
+		}
+		var name = String(row.name != null ? row.name : '').trim();
+		var visit = row.visit_link != null && row.visit_link !== '' ? String(row.visit_link).trim() : '';
+		var bonusLink = row.bonus_link != null && row.bonus_link !== '' ? String(row.bonus_link).trim() : '';
+		var href = visit || bonusLink;
+		var review = row.review_link != null && row.review_link !== '' ? String(row.review_link).trim() : '';
+		var ratingVal = row.rating;
+		var ratingStr = ratingVal != null && ratingVal !== '' ? String(ratingVal).trim() : '';
+
+		var item = {
+			operator: name,
+			product: name,
+			offer: String(row.bonus != null ? row.bonus : '').trim(),
+			href: href,
+			logo: String(row.image_url != null ? row.image_url : '').trim(),
+			year: String(row.launched != null ? row.launched : '').trim(),
+			ctaText: '',
+			terms: '',
+			bullets: externalJsonStringList(row.features),
+			payout: String(row.payout_time != null ? row.payout_time : '').trim(),
+			code: String(row.code != null ? row.code : '').trim(),
+			rating: ratingStr,
+			regulator: String(row.regulator != null ? row.regulator : '').trim(),
+			payments: externalJsonStringList(row.payments),
+			games: gamesFromExternalJson(row.games),
+			liveGames: String(row.live_games != null ? row.live_games : '').trim(),
+			smallPrint: '',
+			readReviewHref: review,
+			readReviewText: '',
+			withdrawals: withdrawalsFromExternalJson(row.withdrawals)
+		};
+		item.ctaText = (item.ctaText || '').trim() || 'Visit';
+		item.readReviewText = (item.readReviewText || '').trim() || 'Read Review';
+		return itemHasContent(item) ? item : null;
+	}
+
+	function parseExternalToplistJson(text) {
+		var raw = (text || '').replace(/^\uFEFF/, '').trim();
+		if (!raw) {
+			return { items: [], error: 'empty' };
+		}
+		var decoded;
+		try {
+			decoded = JSON.parse(raw);
+		} catch (e) {
+			return { items: [], error: 'invalid' };
+		}
+		if (!Array.isArray(decoded)) {
+			return { items: [], error: 'invalid' };
+		}
+		var items = [];
+		var i;
+		for (i = 0; i < decoded.length; i += 1) {
+			var it = jsonRowToItem(decoded[i]);
+			if (it) {
+				items.push(it);
+			}
+		}
+		if (!items.length) {
+			return { items: [], error: 'empty' };
+		}
+		return { items: items, error: '' };
+	}
+
+	function jsonRatingOut(ratingRaw) {
+		var s = (ratingRaw || '').toString().trim();
+		if (!s) {
+			return null;
+		}
+		var n = parseFloat(s);
+		if (!isNaN(n) && isFinite(n)) {
+			return n;
+		}
+		return s;
+	}
+
+	function itemsToExternalToplistJson(items) {
+		return (items || []).map(function (it, idx) {
+			var href = (it.href || '').trim();
+			var gamesArr = Array.isArray(it.games) ? it.games : splitList((it.games || '').toString());
+			var wArr = Array.isArray(it.withdrawals) ? it.withdrawals : splitList((it.withdrawals || '').toString());
+			var name = (it.product || it.operator || '').trim();
+			var review = (it.readReviewHref || '').trim();
+			return {
+				position: String(idx + 1),
+				name: name,
+				rating: jsonRatingOut(it.rating),
+				launched: (it.year || '').trim(),
+				regulator: (it.regulator || '').trim(),
+				bonus: (it.offer || '').trim(),
+				bonus_link: href ? href : null,
+				payout_time: (it.payout || '').trim(),
+				features: Array.isArray(it.bullets) ? it.bullets.slice() : splitList((it.bullets || '').toString()),
+				games: gamesArr.join(' '),
+				live_games: (it.liveGames || '').trim(),
+				withdrawals: wArr.length ? wArr.join(' ') : '',
+				code: (it.code || '').trim(),
+				image_url: (it.logo || '').trim(),
+				visit_link: null,
+				review_link: review ? review : null,
+				payments: Array.isArray(it.payments) ? it.payments.slice() : splitList((it.payments || '').toString())
+			};
+		});
+	}
+
+	function downloadTextFile(filename, text, mime) {
+		var blob = new Blob([text], { type: mime || 'application/octet-stream' });
+		var url = URL.createObjectURL(blob);
+		var a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		a.click();
+		URL.revokeObjectURL(url);
+	}
+
 	blocks.registerBlockType('toplist/rankings', {
 		apiVersion: 2,
 		title: __('Toplist', 'toplist'),
@@ -346,14 +516,13 @@
 			defaultHeaderMode: { type: 'string', default: 'global' },
 			defaultHeaderRow: { type: 'string', default: '' },
 			headingMode: { type: 'string', default: 'global' },
-			headingText: { type: 'string', default: '' },
-			_lines: { type: 'string', default: '' }
+			headingText: { type: 'string', default: '' }
 		},
 		edit: function (props) {
 			var attrs = props.attributes;
 			var setAttributes = props.setAttributes;
 			var blockProps = useBlockProps();
-			var lines = attrs._lines || itemsToLines(attrs.items, {
+			var lines = itemsToLines(attrs.items, {
 				defaultCtaText: attrs.defaultCtaText,
 				defaultReadReviewText: attrs.defaultReadReviewText
 			});
@@ -362,6 +531,8 @@
 			var [isLoadingSaved, setIsLoadingSaved] = useState(false);
 			var [newListName, setNewListName] = useState('');
 			var [statusText, setStatusText] = useState('');
+			var jsonInputRef = useRef(null);
+			var loadRequestEpoch = useRef(0);
 
 			function getEffectiveDefaultHeaderRow(overrides) {
 				var mode = (overrides && overrides.defaultHeaderMode) || attrs.defaultHeaderMode || 'global';
@@ -385,7 +556,6 @@
 				};
 				var parsed = parseLinesToItems(nextLines, defaults);
 				setAttributes(Object.assign({
-					_lines: nextLines,
 					items: parsed.items,
 					fieldIncludes: parsed.directives.includes,
 					fieldExcludes: parsed.directives.excludes
@@ -409,8 +579,12 @@
 					return;
 				}
 
+				var requestId = ++loadRequestEpoch.current;
 				setIsLoadingSaved(true);
 				apiFetch({ path: '/toplist-block/v1/toplists/' + id }).then(function (data) {
+					if (requestId !== loadRequestEpoch.current) {
+						return;
+					}
 					var content = (data && data.content) ? String(data.content) : '';
 					var differs = lines.trim() !== content.trim();
 					if (!settings.force && differs) {
@@ -422,15 +596,35 @@
 					if (!differs && settings.skipIfSame) {
 						return;
 					}
+					if (requestId !== loadRequestEpoch.current) {
+						return;
+					}
 					parseAndSet(content, null, {
 						savedToplistId: id,
 						savedToplistMode: settings.mode || attrs.savedToplistMode || 'linked'
 					});
 					setStatusText(__('Loaded saved toplist.', 'toplist'));
 				}).catch(function () {
+					if (requestId !== loadRequestEpoch.current) {
+						return;
+					}
 					setStatusText(__('Unable to load saved toplist.', 'toplist'));
 				}).finally(function () {
+					if (requestId !== loadRequestEpoch.current) {
+						return;
+					}
 					setIsLoadingSaved(false);
+				});
+			}
+
+			function applyJsonImportedItems(importedItems) {
+				loadRequestEpoch.current += 1;
+				setAttributes({
+					items: importedItems,
+					fieldIncludes: [],
+					fieldExcludes: [],
+					savedToplistId: 0,
+					savedToplistMode: 'copied'
 				});
 			}
 
@@ -792,13 +986,64 @@
 					help: __('Use | between columns and ; for bullets/payments/games/withdrawals.', 'toplist')
 				}),
 
-				el('div', { style: { display: 'flex', gap: 8 } },
+				el('div', { style: { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' } },
 					el(Button, { variant: 'secondary', onClick: addExample }, __('Add example row', 'toplist')),
 					el(Button, {
 						variant: 'tertiary',
 						onClick: function () { parseAndSet(''); }
-					}, __('Clear', 'toplist'))
+					}, __('Clear', 'toplist')),
+					el(Button, {
+						variant: 'secondary',
+						onClick: function () {
+							var node = jsonInputRef.current;
+							if (node) {
+								node.click();
+							}
+						}
+					}, __('Import JSON…', 'toplist')),
+					el(Button, {
+						variant: 'secondary',
+						disabled: !(attrs.items && attrs.items.length),
+						onClick: function () {
+							var rows = itemsToExternalToplistJson(attrs.items || []);
+							downloadTextFile('toplist.json', JSON.stringify(rows, null, 2), 'application/json;charset=utf-8');
+						}
+					}, __('Export JSON', 'toplist'))
 				),
+				el('input', {
+					type: 'file',
+					accept: '.json,application/json,application/octet-stream,.txt',
+					style: { display: 'none' },
+					ref: jsonInputRef,
+					onChange: function (ev) {
+						var file = ev.target.files && ev.target.files[0];
+						if (!file) {
+							return;
+						}
+						var reader = new FileReader();
+						reader.onload = function () {
+							var parsed = parseExternalToplistJson(String(reader.result || ''));
+							if (parsed.error === 'invalid') {
+								window.alert(__('Invalid JSON: expected an array.', 'toplist'));
+								return;
+							}
+							if (parsed.error === 'empty' || !parsed.items.length) {
+								window.alert(__('No valid casino rows found in JSON.', 'toplist'));
+								return;
+							}
+							if (!window.confirm(__('Replace the current list with this JSON file?', 'toplist'))) {
+								return;
+							}
+							applyJsonImportedItems(parsed.items);
+							setStatusText(__('Imported from JSON.', 'toplist'));
+						};
+						reader.onerror = function () {
+							window.alert(__('Could not read the selected file.', 'toplist'));
+						};
+						reader.readAsText(file);
+						ev.target.value = '';
+					}
+				}),
 
 				el('hr', {}),
 				el('strong', {}, __('Preview (simplified)', 'toplist')),

@@ -1,0 +1,278 @@
+[
+  {
+    "position": "1",
+    "name": "Mr Vegas Casino",
+    "rating": 4.9,
+    "launched": "2020",
+    "regulator": "Malta Gaming Authority",
+    "bonus": "100% deposit bonus up to £200 + 11 free spins",
+    "bonus_link": "https://www.mrvegas.com/welcome-bonus/",
+    "payout_time": "Instant",
+    "features": [
+      "Weekly 'Rainbow Friday' cashback",
+      "Large slots and live casino selection"
+    ],
+    "games": "Slots Roulette Blackjack Live Casino",
+    "live_games": "400+",
+    "withdrawals": "Fast withdrawals",
+    "code": "LUCKY26",
+    "image_url": "https://objects.kaxmedia.com/auto/o/200559/775e8a925e.png",
+    "visit_link": "https://www.mrvegas.com/",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "Mastercard",
+      "Skrill",
+      "Neteller"
+    ]
+  },
+  {
+    "position": "2",
+    "name": "Betway Casino",
+    "rating": 4.2,
+    "launched": "2006",
+    "regulator": "Malta Gaming Authority; UK Gambling Commission",
+    "bonus": "30% cashback on losses in the first 24 hours",
+    "bonus_link": "https://betway.com/",
+    "payout_time": "Instant",
+    "features": [
+      "Sportsbook and casino in one account",
+      "Licensed in the UK and Malta"
+    ],
+    "games": "Slots Blackjack Roulette Live Casino Bingo Poker",
+    "live_games": "200+",
+    "withdrawals": "Fast withdrawals",
+    "code": "LUCKY26",
+    "image_url": "https://picsum.photos/seed/betway/200/150",
+    "visit_link": "https://betway.com/",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "PayPal",
+      "Neteller"
+    ]
+  },
+  {
+    "position": "3",
+    "name": "888 Casino",
+    "rating": 4.6,
+    "launched": "1997",
+    "regulator": "UK Gambling Commission",
+    "bonus": "100% first-deposit bonus up to $200",
+    "bonus_link": "https://www.888casino.com/promotions/welcome-bonus-offer/",
+    "payout_time": "Instant",
+    "features": [
+      "2000+ games",
+      "Licensed UK operation"
+    ],
+    "games": "Slots Blackjack Roulette Live Casino",
+    "live_games": "300+",
+    "withdrawals": "Fast withdrawals",
+    "code": "WELCOME888",
+    "image_url": "https://picsum.photos/seed/888/200/120",
+    "visit_link": "https://www.888casino.com/",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "Mastercard",
+      "PayPal",
+      "Apple Pay",
+      "Neteller"
+    ]
+  },
+  {
+    "position": "4",
+    "name": "LeoVegas Casino",
+    "rating": 4.8,
+    "launched": "2012",
+    "regulator": "Malta Gaming Authority; UK Gambling Commission",
+    "bonus": "Up to €1,000 cash + 2,600 free spins",
+    "bonus_link": "https://www.leovegas.com/en-row/promotions/bonuses/c",
+    "payout_time": "Instant",
+    "features": [
+      "Mobile-first casino brand",
+      "Wide range of payment methods"
+    ],
+    "games": "Slots Live Casino Jackpots Sports Betting",
+    "live_games": "500+",
+    "withdrawals": "Same-day withdrawals",
+    "code": "LEO100",
+    "image_url": "https://picsum.photos/seed/leovegas/200/120",
+    "visit_link": "https://www.leovegas.com/",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "Mastercard",
+      "Trustly",
+      "Skrill",
+      "PayPal",
+      "Neteller"
+    ]
+  },
+  {
+    "position": "5",
+    "name": "Casumo Casino",
+    "rating": 4.4,
+    "launched": "2012",
+    "regulator": "Malta Gaming Authority; UK Gambling Commission; Gibraltar Gambling Commissioner",
+    "bonus": "100% up to €300 + 50 bonus spins",
+    "bonus_link": "https://www.casumo.com/gi/promotions/",
+    "payout_time": "Instant",
+    "features": [
+      "Gamified rewards experience",
+      "Daily promotions ('Umo Days')"
+    ],
+    "games": "Slots Roulette Blackjack Live Casino Sports Betting",
+    "live_games": "250+",
+    "withdrawals": "Fast withdrawals",
+    "code": "CASUMO50",
+    "image_url": "https://picsum.photos/seed/casumo/200/120",
+    "visit_link": "https://www.casumo.com/gi/",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "PayPal",
+      "Skrill"
+    ]
+  },
+  {
+    "position": "6",
+    "name": "Paddy Power Casino",
+    "rating": 4.3,
+    "launched": "1988",
+    "regulator": "UK Gambling Commission; Malta Gaming Authority",
+    "bonus": "€10 Risk Free First Bet",
+    "bonus_link": "https://example.com/paddypower",
+    "payout_time": "Pay by Bank withdrawals can be immediate",
+    "features": [
+      "Irish-founded brand",
+      "Sports, casino, games and bingo under one account"
+    ],
+    "games": "Sports Betting Slots Live Casino Games Bingo Poker",
+    "live_games": "150+",
+    "withdrawals": "Fast withdrawals",
+    "code": "RISKFREE",
+    "image_url": "https://picsum.photos/seed/paddypower/200/120",
+    "visit_link": "https://www.paddypower.com/casino",
+    "review_link": null,
+    "payments": [
+      "Pay by Bank",
+      "Debit Cards",
+      "Apple Pay",
+      "PayPal",
+      "Skrill",
+      "Neteller",
+      "Paysafecard",
+      "Bank Transfer"
+    ]
+  },
+  {
+    "position": "7",
+    "name": "PlayOJO Casino",
+    "rating": 4.7,
+    "launched": "2017",
+    "regulator": "UK Gambling Commission; Malta Gaming Authority",
+    "bonus": "50 free spins on first deposit of £10 or more",
+    "bonus_link": "https://www.playojo.com/casino/promos/welcome-bonus/",
+    "payout_time": "Instant",
+    "features": [
+      "No wagering on bonuses",
+      "Fair Play Guarantee"
+    ],
+    "games": "Slots Live Casino Jackpots Bingo",
+    "live_games": "200+",
+    "withdrawals": "Fast withdrawals",
+    "code": "NOWAGER",
+    "image_url": "https://picsum.photos/seed/playojo/200/120",
+    "visit_link": "https://www.playojo.com/",
+    "review_link": null,
+    "payments": [
+      "Debit cards",
+      "eWallets",
+      "Apple Pay",
+      "Instant Bank Payment"
+    ]
+  },
+  {
+    "position": "8",
+    "name": "Rizk Casino",
+    "rating": 4.5,
+    "launched": "2016",
+    "regulator": "Malta Gaming Authority; UK Gambling Commission",
+    "bonus": "100% bonus up to €100 + 100 free spins",
+    "bonus_link": "https://rizk.com/en",
+    "payout_time": "Instant",
+    "features": [
+      "Wheel of Rizk rewards",
+      "Casino and sportsbook"
+    ],
+    "games": "Slots Roulette Blackjack Live Casino Sports Betting",
+    "live_games": "180+",
+    "withdrawals": "Fast withdrawals",
+    "code": "RIZK100",
+    "image_url": "https://picsum.photos/seed/rizk/200/120",
+    "visit_link": "https://rizk.com/en",
+    "review_link": null,
+    "payments": [
+      "Skrill",
+      "Neteller",
+      "PayPal"
+    ]
+  },
+  {
+    "position": "9",
+    "name": "Unibet Casino",
+    "rating": 4.4,
+    "launched": "1997",
+    "regulator": "Gibraltar Gambling Commissioner; UK Gambling Commission",
+    "bonus": "£20 casino bonus + 150 free spins on Fishin’ Frenzy: The Big Catch",
+    "bonus_link": "https://www.unibet.co.uk/casino",
+    "payout_time": "Instant",
+    "features": [
+      "Established global betting and casino brand",
+      "Secure payment methods highlighted on UK site"
+    ],
+    "games": "Slots Sportsbook Live Casino",
+    "live_games": "350+",
+    "withdrawals": "Fast withdrawals",
+    "code": "UNI100",
+    "image_url": "https://picsum.photos/seed/unibet/200/120",
+    "visit_link": "https://www.unibet.co.uk/casino",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "Mastercard",
+      "PayPal",
+      "Apple Pay",
+      "Bank Transfer",
+      "Paysafecard"
+    ]
+  },
+  {
+    "position": "10",
+    "name": "Betfair Casino",
+    "rating": 4.3,
+    "launched": "2000",
+    "regulator": "UK Gambling Commission; Malta Gaming Authority",
+    "bonus": "50 free spins; extra 50 spins when you deposit £10",
+    "bonus_link": "https://casino.betfair.com/",
+    "payout_time": "Instant",
+    "features": [
+      "Betting exchange plus casino",
+      "Live casino available 24/7"
+    ],
+    "games": "Exchange Betting Slots Live Casino Blackjack Roulette Video Bingo",
+    "live_games": "300+",
+    "withdrawals": "Fast withdrawals",
+    "code": "BETFAIR100",
+    "image_url": "https://picsum.photos/seed/betfair/200/120",
+    "visit_link": "https://casino.betfair.com/",
+    "review_link": null,
+    "payments": [
+      "Visa",
+      "Mastercard",
+      "Maestro",
+      "Apple Pay"
+    ]
+  }
+]
