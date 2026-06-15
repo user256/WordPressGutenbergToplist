@@ -1,40 +1,102 @@
 # Toplist Block
 
-This is a WordPress Gutenberg block that shows a toplist (casinos, products, whatever).
-It’s not fancy. It works if you don’t break it. More features may be coming, priority is low however. 
+WordPress Gutenberg block for casino/product toplists — pipe-delimited editing, library CPT, JSON/CSV import, and linked live lists.
 
-## How to install
-1. Zip the plugin folder
-2. WP Admin → Plugins → Add New → Upload
-3. Upload zip, install, activate
+**Roadmap:** [`tickets/overview.md`](tickets/overview.md) · **Programme:** Sprints 1–5 complete
 
-If it doesn’t show up, deactivate and activate again.
+## Two-plugin model
 
-## Where is the block?
-Posts → Add new → + → search for **Toplist** → **Toplist**
+| Build | Folder / zip | Where |
+|-------|----------------|-------|
+| **Premium** (edit here) | `toplist-block/` | Portal download |
+| **Lite** (generated) | `toplist-block-lite/` | WordPress.org |
 
-## How do I style this?
-Settings → Toplist Block
+```bash
+php scripts/build-lite.php    # builds lite + premium zips
+composer test                 # PHPUnit parse/import tests
+composer test:build           # lite smoke tests
+bash scripts/make-pot.sh      # regenerate languages/toplist.pot (requires WP-CLI)
+```
 
-## Data format
-`operator|product|offer|link|logo|year|button|terms|bullets`
+See [`docs/free-vs-premium.md`](docs/free-vs-premium.md) and [`docs/build.md`](docs/build.md). Lite and premium are **mutually exclusive** installs; both use block `toplist/rankings`.
+
+## Repo layout
+
+```
+toplist/
+├── toplist-block/         # premium canonical source
+├── scripts/build-lite.php
+├── tests/build/run.php
+├── docs/
+├── tickets/overview.md
+└── process_tickets.py
+```
+
+## Install (development)
+
+```bash
+bash ../install-local.sh --plugin-only   # from Casino-project root → /var/www/html
+```
+
+Or zip `toplist-block/` (premium) or `toplist-block-lite.zip` (lite) and upload in WP Admin.
+
+## Block
+
+Posts → Add New → **Toplist** block. Inspector tabs: Theme, Defaults, Toggle visibility.
+
+**Premium only:** Saved Toplist library, JSON import/export in editor, admin CSV/JSON on Toplists CPT.
+
+## Pipe format (full)
+
+One row per line, `|` separated:
+
+```
+operator|product|offer|href|logo|year|ctaText|terms|bullets|payout|code|rating|regulator|payments|games|liveGames|smallPrint|readReviewHref|readReviewText|withdrawals
+```
+
+- Multi-value fields (`bullets`, `payments`, `games`, `withdrawals`): use `;` inside the column.
+- Optional header row: field names as directives; prefix with `-` or `!` to exclude columns.
 
 Example:
-`Mr Vegas|Mr Vegas Casino|100% Bonus|https://example.com|https://via.placeholder.com/150|2020|Visit|T&Cs|Fast payouts;Good slots`
 
-## Like it?
-If this helped you, you can buy me a coffee/dram:
-paypal.me/user256 
+```
+Mr Vegas|Mr Vegas Casino|100% Bonus|https://example.com|https://via.placeholder.com/150|2020|Visit|T&Cs|Fast payouts;Good slots|||||||||||
+```
 
+## External JSON schema
 
-## License (MIT)
-MIT License
+Import/export (premium) uses an array of objects. Fixtures: `toplist.json`, `toplist_updated.json`.
 
-Copyright (c) 2025 Toplist Block
+| JSON field | Internal field | Notes |
+|------------|----------------|-------|
+| `name` | `operator`, `product` | Both set from name |
+| `bonus` | `offer` | |
+| `visit_link` | `href` | Preferred |
+| `bonus_link` | `href` | Fallback if no `visit_link` |
+| `image_url` | `logo` | |
+| `launched` | `year` | |
+| `features[]` | `bullets` | |
+| `games` | `games` | String or array |
+| `live_games` | `liveGames` | |
+| `withdrawals` | `withdrawals` | String or array |
+| `review_link` | `readReviewHref` | |
+| `payments[]` | `payments` | |
+| `payout_time` | `payout` | |
+| `code` | `code` | |
+| `rating` | `rating` | |
+| `regulator` | `regulator` | |
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so.
+## Global settings
+
+Settings → Toplist Block — global CSS, heading, default header row, field visibility toggles.
+
+## Ticket workflow
+
+1. `tickets/overview.md` → pick ticket  
+2. Implement; log notes in ticket file  
+3. Mark `[x]` in overview  
+4. `python3 process_tickets.py --apply`
+
+## License
+
+GPL-2.0-or-later (WordPress plugin). See plugin header.

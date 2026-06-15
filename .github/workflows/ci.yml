@@ -1,0 +1,58 @@
+name: Build & Test
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: PHPUnit
+        run: composer test
+
+      - name: Build + lite smoke tests
+        run: composer test:build
+
+  release:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Build distribution zips
+        run: php scripts/build-lite.php
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: toplist-block-dist
+          path: |
+            toplist-block-lite.zip
+            toplist-block.zip
+          if-no-files-found: error

@@ -3,12 +3,45 @@
  * Plugin Name: Toplist Block
  * Description: A Gutenberg Toplist block. No build tools required.
  * Version: 0.1.2
+ * Text Domain: toplist
  * Author: A medly of bots
  * License: GPL-2.0-or-later
  */
 if (!defined('ABSPATH')) {
 	exit;
 }
+
+if (!defined('TOPLIST_BLOCK_PATH')) {
+	define('TOPLIST_BLOCK_PATH', __DIR__);
+}
+
+if (!defined('TOPLIST_BLOCK_VERSION')) {
+	define('TOPLIST_BLOCK_VERSION', '0.1.2');
+}
+
+add_action('init', 'toplist_load_textdomain');
+
+/**
+ * Load plugin translations.
+ *
+ * @return void
+ */
+function toplist_load_textdomain(): void
+{
+	load_plugin_textdomain('toplist', false, dirname(plugin_basename(TOPLIST_BLOCK_PATH . '/toplist-block.php')) . '/languages');
+}
+
+// @toplist-premium-start
+require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-license.php';
+require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-license-admin.php';
+require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-updater.php';
+Toplist_Block_License_Admin::init();
+Toplist_Block_Updater::init();
+add_action(Toplist_Block_License::CRON_HOOK, array('Toplist_Block_License', 'do_recheck'));
+register_activation_hook(TOPLIST_BLOCK_PATH . '/toplist-block.php', 'toplist_block_on_activate');
+add_action('admin_init', 'toplist_block_conflict_guard');
+add_action('admin_notices', 'toplist_block_upgraded_from_lite_notice');
+// @toplist-premium-end
 
 /**
  * Normalize arbitrary value to a trimmed string.
@@ -605,6 +638,98 @@ function toplist_items_to_external_json_rows($items)
 	return $rows;
 }
 
+// @toplist-premium-start
+/**
+ * Deactivate lite when premium activates; show one-time notice.
+ *
+ * @return void
+ */
+function toplist_block_on_activate(): void
+{
+	if (!function_exists('is_plugin_active')) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	if (is_plugin_active('toplist-block-lite/toplist-block-lite.php')) {
+		deactivate_plugins('toplist-block-lite/toplist-block-lite.php', true);
+		set_transient('toplist_upgraded_from_lite', 1, WEEK_IN_SECONDS);
+	}
+}
+
+/**
+ * Prevent both plugins from staying active together.
+ *
+ * @return void
+ */
+function toplist_block_conflict_guard(): void
+{
+	if (!function_exists('is_plugin_active')) {
+		return;
+	}
+	$lite = 'toplist-block-lite/toplist-block-lite.php';
+	$pro = 'toplist-block/toplist-block.php';
+	if (is_plugin_active($lite) && is_plugin_active($pro)) {
+		deactivate_plugins($lite, true);
+		set_transient('toplist_upgraded_from_lite', 1, WEEK_IN_SECONDS);
+	}
+}
+
+/**
+ * One-time notice after upgrading from lite.
+ *
+ * @return void
+ */
+function toplist_block_upgraded_from_lite_notice(): void
+{
+	if (!current_user_can('manage_options') || !get_transient('toplist_upgraded_from_lite')) {
+		return;
+	}
+	echo '<div class="notice notice-success is-dismissible"><p>';
+	echo esc_html__('Toplist Block Pro is active. Your existing Toplist blocks are unchanged. Enter your license under Settings → Toplist Block to unlock libraries and import.', 'toplist');
+	echo '</p></div>';
+	delete_transient('toplist_upgraded_from_lite');
+}
+
+/**
+ * Build ItemList schema.org JSON-LD for a toplist.
+ *
+ * @param array<int, array<string, mixed>> $items Parsed items.
+ * @param string                           $heading List heading.
+ * @return array<string, mixed>
+ */
+function toplist_build_itemlist_schema(array $items, string $heading): array
+{
+	$list = array();
+	foreach ($items as $i => $item) {
+		if (!is_array($item)) {
+			continue;
+		}
+		$name = toplist_clean_text($item['product'] ?? '');
+		if ($name === '') {
+			$name = toplist_clean_text($item['operator'] ?? '');
+		}
+		if ($name === '') {
+			continue;
+		}
+		$entry = array(
+			'@type' => 'ListItem',
+			'position' => $i + 1,
+			'name' => $name,
+		);
+		$url = toplist_clean_text($item['href'] ?? '');
+		if ($url !== '') {
+			$entry['url'] = $url;
+		}
+		$list[] = $entry;
+	}
+
+	return array(
+		'@context' => 'https://schema.org',
+		'@type' => 'ItemList',
+		'name' => $heading !== '' ? $heading : __('Toplist', 'toplist'),
+		'itemListElement' => $list,
+	);
+}
+
 /**
  * Register Toplists library custom post type.
  *
@@ -788,8 +913,27 @@ function toplist_render_raw_content_metabox($post)
 {
 	wp_nonce_field('toplist_save_raw_content', 'toplist_raw_content_nonce');
 	$content = is_string($post->post_content) ? $post->post_content : '';
+	$fields = toplist_supported_fields();
+	echo '<div data-toplist-spreadsheet="1">';
+	echo '<h2 class="nav-tab-wrapper" style="margin-bottom:12px;">';
+	echo '<a href="#" class="nav-tab nav-tab-active" data-toplist-tab="spreadsheet">' . esc_html__('Spreadsheet', 'toplist') . '</a>';
+	echo '<a href="#" class="nav-tab" data-toplist-tab="raw">' . esc_html__('Raw pipes', 'toplist') . '</a>';
+	echo '</h2>';
+	echo '<div data-toplist-panel="spreadsheet">';
+	echo '<p class="description">' . esc_html__('Edit rows in a table. Changes sync to pipe content on save.', 'toplist') . '</p>';
+	echo '<div style="overflow-x:auto;max-height:480px;margin-bottom:8px;">';
+	echo '<table class="widefat striped toplist-spreadsheet-table"><thead><tr>';
+	foreach ($fields as $field) {
+		echo '<th>' . esc_html($field) . '</th>';
+	}
+	echo '<th></th></tr></thead><tbody id="toplist-spreadsheet-body"></tbody></table>';
+	echo '</div>';
+	echo '<p><button type="button" class="button" id="toplist-spreadsheet-add-row">' . esc_html__('Add row', 'toplist') . '</button></p>';
+	echo '</div>';
+	echo '<div data-toplist-panel="raw" style="display:none;">';
 	echo '<p>' . esc_html__('Use one line per item. Pipe-delimited format is supported, including optional first-row header directives.', 'toplist') . '</p>';
 	echo '<textarea name="toplist_raw_content" id="toplist_raw_content" style="width:100%;min-height:320px;font-family:monospace;" spellcheck="false">' . esc_textarea($content) . '</textarea>';
+	echo '</div></div>';
 }
 
 /**
@@ -1663,7 +1807,22 @@ function toplist_enqueue_toplist_admin_assets($hook_suffix)
 		return;
 	}
 	wp_enqueue_media();
+	$fields = toplist_supported_fields();
+	wp_enqueue_script(
+		'toplist-admin-spreadsheet',
+		plugins_url('assets/admin-spreadsheet.js', TOPLIST_BLOCK_PATH . '/toplist-block.php'),
+		array(),
+		defined('TOPLIST_BLOCK_VERSION') ? TOPLIST_BLOCK_VERSION : '1.0',
+		true
+	);
+	wp_add_inline_script(
+		'toplist-admin-spreadsheet',
+		'window.toplistSpreadsheetFields = ' . wp_json_encode(array_values($fields)) . ';',
+		'before'
+	);
 }
+
+// @toplist-premium-end
 
 function toplist_register_block()
 {
@@ -1801,6 +1960,7 @@ function toplist_register_block()
 				'type' => 'array',
 				'default' => array(),
 			),
+			// @toplist-premium-start
 			'savedToplistId' => array(
 				'type' => 'number',
 				'default' => 0,
@@ -1809,6 +1969,11 @@ function toplist_register_block()
 				'type' => 'string',
 				'default' => 'linked',
 			),
+			'schemaEnabled' => array(
+				'type' => 'boolean',
+				'default' => false,
+			),
+			// @toplist-premium-end
 			'defaultHeaderMode' => array(
 				'type' => 'string',
 				'default' => 'global',
@@ -1829,26 +1994,44 @@ function toplist_register_block()
 	));
 }
 add_action('init', 'toplist_register_block');
-add_action('init', 'toplist_register_cpt');
-add_filter('use_block_editor_for_post_type', 'toplist_disable_block_editor_for_toplists', 10, 2);
-add_filter('manage_toplist_list_posts_columns', 'toplist_toplists_admin_columns');
-add_action('manage_toplist_list_posts_custom_column', 'toplist_toplists_admin_column_content', 10, 2);
-add_action('rest_api_init', 'toplist_register_rest_routes');
-add_action('add_meta_boxes_toplist_list', 'toplist_register_toplist_metaboxes');
-add_action('save_post_toplist_list', 'toplist_save_toplist_raw_content');
-add_action('admin_post_toplist_export_csv', 'toplist_handle_export_csv');
-add_action('admin_post_toplist_export_json', 'toplist_handle_export_json');
-add_action('admin_post_toplist_export_all_csv', 'toplist_handle_export_all_csv');
-add_action('admin_post_toplist_export_bulk_template_csv', 'toplist_handle_export_bulk_template_csv');
-add_action('admin_post_toplist_import_csv', 'toplist_handle_import_csv');
-add_action('admin_post_toplist_import_json', 'toplist_handle_import_json');
-add_action('admin_post_toplist_import_all_csv', 'toplist_handle_import_all_csv');
-add_action('admin_notices', 'toplist_import_admin_notice');
-add_action('admin_enqueue_scripts', 'toplist_enqueue_toplist_admin_assets');
-add_action('admin_footer', 'toplist_print_import_forms_in_footer', 5);
+// @toplist-premium-start
+add_action('plugins_loaded', 'toplist_boot_premium_features', 20);
+
+/**
+ * Register library/import features only when license is valid.
+ *
+ * @return void
+ */
+function toplist_boot_premium_features()
+{
+	if (!class_exists('Toplist_Block_License') || !Toplist_Block_License::is_valid()) {
+		return;
+	}
+
+	add_action('init', 'toplist_register_cpt');
+	add_filter('use_block_editor_for_post_type', 'toplist_disable_block_editor_for_toplists', 10, 2);
+	add_filter('manage_toplist_list_posts_columns', 'toplist_toplists_admin_columns');
+	add_action('manage_toplist_list_posts_custom_column', 'toplist_toplists_admin_column_content', 10, 2);
+	add_action('rest_api_init', 'toplist_register_rest_routes');
+	add_action('add_meta_boxes_toplist_list', 'toplist_register_toplist_metaboxes');
+	add_action('save_post_toplist_list', 'toplist_save_toplist_raw_content');
+	add_action('admin_post_toplist_export_csv', 'toplist_handle_export_csv');
+	add_action('admin_post_toplist_export_json', 'toplist_handle_export_json');
+	add_action('admin_post_toplist_export_all_csv', 'toplist_handle_export_all_csv');
+	add_action('admin_post_toplist_export_bulk_template_csv', 'toplist_handle_export_bulk_template_csv');
+	add_action('admin_post_toplist_import_csv', 'toplist_handle_import_csv');
+	add_action('admin_post_toplist_import_json', 'toplist_handle_import_json');
+	add_action('admin_post_toplist_import_all_csv', 'toplist_handle_import_all_csv');
+	add_action('admin_notices', 'toplist_import_admin_notice');
+	add_action('admin_enqueue_scripts', 'toplist_enqueue_toplist_admin_assets');
+	add_action('admin_footer', 'toplist_print_import_forms_in_footer', 5);
+}
+// @toplist-premium-end
 
 if (is_admin()) {
+	// @toplist-premium-start
 	require_once __DIR__ . '/admin-diagnostics.php';
+	// @toplist-premium-end
 	require_once __DIR__ . '/settings-page.php';
 }
 
@@ -1895,13 +2078,20 @@ function toplist_render($attributes)
 	$field_includes = array();
 	$field_excludes = array();
 
+	// @toplist-premium-start
 	// Linked mode: source all rows from saved Toplist library post content.
-	if ($saved_toplist_mode === 'linked' && $saved_toplist_id > 0) {
+	if (
+		$saved_toplist_mode === 'linked'
+		&& $saved_toplist_id > 0
+		&& class_exists('Toplist_Block_License')
+		&& Toplist_Block_License::is_valid()
+	) {
 		$saved_post = get_post($saved_toplist_id);
 		if ($saved_post && $saved_post->post_type === 'toplist_list') {
 			$lines = (string) $saved_post->post_content;
 		}
 	}
+	// @toplist-premium-end
 
 	if (trim($lines) !== '') {
 		$parsed = toplist_parse_lines_to_items($lines, array(
@@ -2178,5 +2368,17 @@ function toplist_render($attributes)
 		<?php endforeach; ?>
 	</ol>
 	<?php
+	// @toplist-premium-start
+	if (
+		!empty($attributes['schemaEnabled'])
+		&& class_exists('Toplist_Block_License')
+		&& Toplist_Block_License::is_valid()
+	) {
+		$schema = toplist_build_itemlist_schema($items, $effective_heading_text);
+		if (!empty($schema['itemListElement'])) {
+			echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+		}
+	}
+	// @toplist-premium-end
 	return ob_get_clean();
 }

@@ -102,6 +102,7 @@ function toplist_settings_page()
         }
     }
 
+    // @toplist-premium-start
     $local_bulk_result = null;
     $posted_action = isset($_POST['action']) ? sanitize_key((string) wp_unslash($_POST['action'])) : '';
     $bulk_import_requested = isset($_POST['toplist_bulk_import_submit'])
@@ -149,6 +150,8 @@ function toplist_settings_page()
         }
     }
 
+    // @toplist-premium-end
+
     // Save settings
     if (isset($_POST['toplist_save_settings'])) {
         check_admin_referer('toplist_settings_nonce');
@@ -172,6 +175,7 @@ function toplist_settings_page()
     $global_heading_text = get_option('toplist_global_heading_text', '');
     $global_default_cta_text = get_option('toplist_global_default_cta_text', 'Visit');
     $global_default_read_review_text = get_option('toplist_global_default_read_review_text', 'Read Review');
+    // @toplist-premium-start
     $bulk_export_url = wp_nonce_url(
         admin_url('admin-post.php?action=toplist_export_all_csv'),
         'toplist_export_all_csv'
@@ -180,9 +184,17 @@ function toplist_settings_page()
         admin_url('admin-post.php?action=toplist_export_bulk_template_csv'),
         'toplist_export_bulk_template_csv'
     );
-    ?>
+	?>
     <div class="wrap">
         <h1>Toplist Block - Global Settings</h1>
+
+        <?php
+        // @toplist-premium-start
+        if (class_exists('Toplist_Block_License_Admin')) {
+            Toplist_Block_License_Admin::render_settings_panel();
+        }
+        // @toplist-premium-end
+        ?>
 
         <?php
         $bulk_import_status = '';
@@ -239,6 +251,7 @@ function toplist_settings_page()
                 <?php
             endif;
         endif;
+        // @toplist-premium-end
         ?>
 
         <style>
@@ -469,6 +482,7 @@ function toplist_settings_page()
 
             <section id="toplist-tab-defaults" class="toplist-settings-panel" role="tabpanel">
                 <table class="form-table">
+                    <?php // @toplist-premium-start ?>
                     <tr>
                         <th scope="row">Bulk CSV Export</th>
                         <td>
@@ -487,6 +501,7 @@ function toplist_settings_page()
                             <p class="description">CSV should include <code>toplist</code> or <code>toplist_id</code> plus field columns (for example: <code>operator</code>, <code>offer</code>, <code>href</code>).</p>
                         </td>
                     </tr>
+                    <?php // @toplist-premium-end ?>
                     <tr>
                         <th scope="row">
                             <label for="toplist_global_heading_text">Global Toplist H2 Heading</label>

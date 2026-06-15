@@ -1,0 +1,763 @@
+# Copyright (C) 2026 A medly of bots
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Toplist Block 0.1.2\n"
+"Report-Msgid-Bugs-To: https://github.com/user256/toplist-block\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-15T20:16:52+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: toplist\n"
+
+#. Plugin Name of the plugin
+#: toplist-block.php
+msgid "Toplist Block"
+msgstr ""
+
+#. Description of the plugin
+#: toplist-block.php
+msgid "A Gutenberg Toplist block. No build tools required."
+msgstr ""
+
+#. Author of the plugin
+#: toplist-block.php
+msgid "A medly of bots"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:41
+#: includes/class-toplist-block-license-admin.php:74
+msgid "You do not have permission to do that."
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:121
+msgid "Toplist Block Pro features are inactive until you enter a valid license key."
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:122
+msgid "Enter license"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:155
+msgid "License verified. Pro features are active."
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:157
+msgid "License key removed."
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:160
+msgid "License could not be verified for this site."
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:171
+msgid "Toplist Block Pro License"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:174
+msgid "Pro active"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:176
+msgid "Pro (grace — API unreachable)"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:178
+msgid "Pro inactive"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:184
+#, php-format
+msgid "Expires %s"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:192
+msgid "xxxx-xxxx-xxxx-xxxx"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:193
+msgid "Save & verify"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:195
+msgid "Remove key"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:202
+msgid "Check now"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:207
+#, php-format
+msgid "Next scheduled recheck: %s UTC"
+msgstr ""
+
+#: includes/class-toplist-block-license-admin.php:211
+msgid "Local toplist blocks keep working without a license. Library, import, and linked lists require Pro."
+msgstr ""
+
+#: includes/class-toplist-block-license.php:419
+#: includes/class-toplist-block-license.php:425
+#: includes/class-toplist-block-license.php:430
+msgid "License check failed."
+msgstr ""
+
+#: includes/class-toplist-block-license.php:445
+msgid "No license key configured."
+msgstr ""
+
+#: includes/class-toplist-block-license.php:453
+msgid "License API URL is not configured."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: includes/class-toplist-block-license.php:495
+#, php-format
+msgid "Non-JSON response from licensing server (HTTP %d)."
+msgstr ""
+
+#: toplist-block.php:687
+msgid "Toplist Block Pro is active. Your existing Toplist blocks are unchanged. Enter your license under Settings → Toplist Block to unlock libraries and import."
+msgstr ""
+
+#: toplist-block.php:728
+#: toplist-block.php:743
+#: block.js:488
+#: block.js:976
+msgid "Toplist"
+msgstr ""
+
+#: toplist-block.php:742
+msgid "Toplists"
+msgstr ""
+
+#: toplist-block.php:744
+msgid "Add New Toplist"
+msgstr ""
+
+#: toplist-block.php:745
+msgid "Edit Toplist"
+msgstr ""
+
+#: toplist-block.php:746
+msgid "New Toplist"
+msgstr ""
+
+#: toplist-block.php:747
+msgid "View Toplist"
+msgstr ""
+
+#: toplist-block.php:748
+msgid "Search Toplists"
+msgstr ""
+
+#: toplist-block.php:749
+msgid "No toplists found"
+msgstr ""
+
+#: toplist-block.php:789
+msgid "Name"
+msgstr ""
+
+#: toplist-block.php:790
+msgid "Shortcode / ID"
+msgstr ""
+
+#: toplist-block.php:791
+msgid "Last Modified"
+msgstr ""
+
+#: toplist-block.php:792
+msgid "Date"
+msgstr ""
+
+#: toplist-block.php:860
+#: toplist-block.php:1189
+#: toplist-block.php:1233
+msgid "Toplist not found."
+msgstr ""
+
+#: toplist-block.php:884
+msgid "Toplist name is required."
+msgstr ""
+
+#: toplist-block.php:919
+msgid "Spreadsheet"
+msgstr ""
+
+#: toplist-block.php:920
+msgid "Raw pipes"
+msgstr ""
+
+#: toplist-block.php:923
+msgid "Edit rows in a table. Changes sync to pipe content on save."
+msgstr ""
+
+#: toplist-block.php:931
+msgid "Add row"
+msgstr ""
+
+#: toplist-block.php:934
+msgid "Use one line per item. Pipe-delimited format is supported, including optional first-row header directives."
+msgstr ""
+
+#: toplist-block.php:963
+msgid "CSV"
+msgstr ""
+
+#: toplist-block.php:964
+msgid "Export as CSV"
+msgstr ""
+
+#: toplist-block.php:965
+#: toplist-block.php:967
+msgid "Import CSV"
+msgstr ""
+
+#: toplist-block.php:968
+msgid "CSV header can use field names: operator, product, offer, href, logo, year, ctaText, terms, bullets, payout, code, rating, regulator, payments, games, liveGames, smallPrint, readReviewHref, readReviewText, withdrawals."
+msgstr ""
+
+#: toplist-block.php:970
+msgid "JSON (toplist.json)"
+msgstr ""
+
+#: toplist-block.php:971
+msgid "Export as JSON"
+msgstr ""
+
+#: toplist-block.php:972
+#: toplist-block.php:974
+msgid "Import JSON"
+msgstr ""
+
+#: toplist-block.php:975
+msgid "Array of objects: name, rating, launched, regulator, bonus, bonus_link, payout_time, features, games, live_games, withdrawals, code, image_url, visit_link, review_link, payments (see repo toplist/toplist.json)."
+msgstr ""
+
+#: toplist-block.php:1013
+msgid "Choose a CSV file first."
+msgstr ""
+
+#: toplist-block.php:1014
+msgid "Choose a JSON file first."
+msgstr ""
+
+#: toplist-block.php:1031
+msgid "Operator"
+msgstr ""
+
+#: toplist-block.php:1032
+msgid "Product"
+msgstr ""
+
+#: toplist-block.php:1033
+msgid "Offer"
+msgstr ""
+
+#: toplist-block.php:1034
+msgid "Primary URL (href)"
+msgstr ""
+
+#: toplist-block.php:1035
+msgid "Logo URL"
+msgstr ""
+
+#: toplist-block.php:1036
+msgid "Launch Year"
+msgstr ""
+
+#: toplist-block.php:1037
+msgid "CTA Text"
+msgstr ""
+
+#: toplist-block.php:1038
+msgid "Terms"
+msgstr ""
+
+#: toplist-block.php:1039
+msgid "Bullets (; separated)"
+msgstr ""
+
+#: toplist-block.php:1040
+msgid "Payout"
+msgstr ""
+
+#: toplist-block.php:1041
+msgid "Code"
+msgstr ""
+
+#: toplist-block.php:1042
+msgid "Rating"
+msgstr ""
+
+#: toplist-block.php:1043
+msgid "Regulator"
+msgstr ""
+
+#: toplist-block.php:1044
+msgid "Payments (; separated)"
+msgstr ""
+
+#: toplist-block.php:1045
+msgid "Games (; separated)"
+msgstr ""
+
+#: toplist-block.php:1046
+msgid "Live Games"
+msgstr ""
+
+#: toplist-block.php:1047
+msgid "Small Print"
+msgstr ""
+
+#: toplist-block.php:1048
+msgid "Read Review URL"
+msgstr ""
+
+#: toplist-block.php:1049
+msgid "Read Review Text"
+msgstr ""
+
+#: toplist-block.php:1050
+msgid "Withdrawals (; separated)"
+msgstr ""
+
+#: toplist-block.php:1053
+msgid "Fill fields below and click \"Add Row to Toplist\". The row is appended to the raw content textarea."
+msgstr ""
+
+#: toplist-block.php:1063
+msgid "Upload/Select Logo"
+msgstr ""
+
+#: toplist-block.php:1064
+msgid "Add Row to Toplist"
+msgstr ""
+
+#: toplist-block.php:1065
+msgid "Clear Builder"
+msgstr ""
+
+#: toplist-block.php:1067
+msgid "Logo uploader sets the Logo URL field automatically. Lists should use semicolons between values."
+msgstr ""
+
+#: toplist-block.php:1079
+msgid "Please fill at least one field before adding a row."
+msgstr ""
+
+#: toplist-block.php:1087
+msgid "Media uploader is not available on this screen. Please refresh and try again."
+msgstr ""
+
+#: toplist-block.php:1087
+msgid "Select Logo"
+msgstr ""
+
+#: toplist-block.php:1087
+msgid "Use this image"
+msgstr ""
+
+#: toplist-block.php:1100
+msgid "Toplist Content"
+msgstr ""
+
+#: toplist-block.php:1109
+msgid "Import / Export"
+msgstr ""
+
+#: toplist-block.php:1118
+msgid "Add Row (GUI Builder)"
+msgstr ""
+
+#: toplist-block.php:1183
+#: toplist-block.php:1227
+msgid "You do not have permission to export this toplist."
+msgstr ""
+
+#: toplist-block.php:1257
+#: toplist-block.php:1655
+msgid "You do not have permission to import into this toplist."
+msgstr ""
+
+#: toplist-block.php:1260
+msgid "Invalid JSON import request."
+msgstr ""
+
+#: toplist-block.php:1302
+msgid "You do not have permission to export toplists."
+msgstr ""
+
+#: toplist-block.php:1541
+msgid "Imported Toplist"
+msgstr ""
+
+#: toplist-block.php:1572
+msgid "You do not have permission to bulk import toplists."
+msgstr ""
+
+#: toplist-block.php:1599
+msgid "You do not have permission to export the bulk template."
+msgstr ""
+
+#: toplist-block.php:1658
+msgid "Invalid CSV import request."
+msgstr ""
+
+#: toplist-block.php:1747
+msgid "CSV imported successfully."
+msgstr ""
+
+#: toplist-block.php:1750
+msgid "CSV import failed: file was empty or invalid."
+msgstr ""
+
+#: toplist-block.php:1753
+msgid "CSV import failed: unable to read the uploaded file."
+msgstr ""
+
+#: toplist-block.php:1767
+msgid "JSON imported successfully."
+msgstr ""
+
+#: toplist-block.php:1770
+msgid "JSON import failed: file was empty or no valid rows."
+msgstr ""
+
+#: toplist-block.php:1773
+msgid "JSON import failed: unable to read the uploaded file."
+msgstr ""
+
+#: toplist-block.php:1776
+msgid "JSON import failed: invalid JSON (expected a JSON array)."
+msgstr ""
+
+#: block.js:597
+msgid "Replace current block content with the saved toplist?"
+msgstr ""
+
+#: block.js:612
+msgid "Loaded saved toplist."
+msgstr ""
+
+#: block.js:617
+msgid "Unable to load saved toplist."
+msgstr ""
+
+#: block.js:641
+msgid "Using local custom content."
+msgstr ""
+
+#: block.js:651
+msgid "Please enter a name for the saved toplist."
+msgstr ""
+
+#: block.js:655
+msgid "Cannot save an empty toplist."
+msgstr ""
+
+#: block.js:673
+msgid "Saved new toplist to library."
+msgstr ""
+
+#: block.js:676
+msgid "Unable to save toplist to library."
+msgstr ""
+
+#: block.js:769
+msgid "— None (custom) —"
+msgstr ""
+
+#: block.js:776
+msgid "Use saved toplist"
+msgstr ""
+
+#: block.js:782
+msgid "Saved toplist mode"
+msgstr ""
+
+#: block.js:785
+msgid "Linked (live updates)"
+msgstr ""
+
+#: block.js:786
+msgid "Copied (local only)"
+msgstr ""
+
+#: block.js:797
+msgid "Load into block"
+msgstr ""
+
+#: block.js:802
+msgid "Refresh from saved"
+msgstr ""
+
+#: block.js:807
+msgid "Detached from saved toplist."
+msgstr ""
+
+#: block.js:809
+msgid "Detach to custom"
+msgstr ""
+
+#: block.js:812
+msgid "Save current as new named toplist"
+msgstr ""
+
+#: block.js:815
+msgid "e.g. UK Casino Top 10"
+msgstr ""
+
+#: block.js:821
+msgid "Save to library"
+msgstr ""
+
+#: block.js:824
+msgid "Linked mode renders from the saved toplist on the frontend. Copied mode uses local block content."
+msgstr ""
+
+#: block.js:833
+msgid "Custom CSS"
+msgstr ""
+
+#: block.js:837
+msgid "Use .toplist as parent selector."
+msgstr ""
+
+#: block.js:840
+msgid "Global CSS is available in Settings -> Toplist Block and applies to all lists."
+msgstr ""
+
+#: block.js:847
+msgid "Global default header is enabled in plugin settings."
+msgstr ""
+
+#: block.js:848
+msgid "Global default header is disabled in plugin settings."
+msgstr ""
+
+#: block.js:850
+msgid "Global H2 heading is set in plugin settings."
+msgstr ""
+
+#: block.js:851
+msgid "Global H2 heading is empty in plugin settings."
+msgstr ""
+
+#: block.js:854
+msgid "List ID"
+msgstr ""
+
+#: block.js:860
+msgid "List Type"
+msgstr ""
+
+#: block.js:865
+msgid "Disclaimer (shown above terms)"
+msgstr ""
+
+#: block.js:870
+msgid "Default CTA Text"
+msgstr ""
+
+#: block.js:873
+msgid "Used when a row ctaText value is empty."
+msgstr ""
+
+#: block.js:876
+msgid "Default Read Review Text"
+msgstr ""
+
+#: block.js:879
+msgid "Used when a row readReviewText value is empty."
+msgstr ""
+
+#: block.js:882
+msgid "Default Toplist Header"
+msgstr ""
+
+#: block.js:885
+msgid "Use global setting"
+msgstr ""
+
+#: block.js:886
+#: block.js:903
+msgid "Off"
+msgstr ""
+
+#: block.js:887
+msgid "Custom header row"
+msgstr ""
+
+#: block.js:893
+msgid "Custom Header Row"
+msgstr ""
+
+#: block.js:899
+msgid "Toplist H2 Heading"
+msgstr ""
+
+#: block.js:902
+msgid "Use global heading"
+msgstr ""
+
+#: block.js:904
+msgid "Custom heading"
+msgstr ""
+
+#: block.js:910
+msgid "Custom H2 Heading Text"
+msgstr ""
+
+#: block.js:913
+msgid "Top 10 Casinos"
+msgstr ""
+
+#: block.js:921
+msgid "Hide fields without removing values from your data."
+msgstr ""
+
+#: block.js:923
+msgid "Show Logo"
+msgstr ""
+
+#: block.js:924
+msgid "Show Launch Year"
+msgstr ""
+
+#: block.js:925
+msgid "Show Offer"
+msgstr ""
+
+#: block.js:926
+msgid "Show Terms & Conditions"
+msgstr ""
+
+#: block.js:927
+msgid "Show Bullet Points"
+msgstr ""
+
+#: block.js:928
+msgid "Show Payout"
+msgstr ""
+
+#: block.js:929
+msgid "Show Code"
+msgstr ""
+
+#: block.js:930
+msgid "Show Rating"
+msgstr ""
+
+#: block.js:931
+msgid "Show Regulator"
+msgstr ""
+
+#: block.js:932
+msgid "Show Payments"
+msgstr ""
+
+#: block.js:933
+msgid "Show Games"
+msgstr ""
+
+#: block.js:934
+msgid "Show Live Games"
+msgstr ""
+
+#: block.js:935
+msgid "Show Small Print"
+msgstr ""
+
+#: block.js:936
+msgid "Show Read Review"
+msgstr ""
+
+#: block.js:937
+msgid "Show Withdrawals"
+msgstr ""
+
+#: block.js:941
+msgid "Output ItemList schema (JSON-LD)"
+msgstr ""
+
+#: block.js:944
+msgid "Adds structured data for search engines (Pro, valid license)."
+msgstr ""
+
+#: block.js:969
+msgid "Theme"
+msgstr ""
+
+#: block.js:970
+msgid "Defaults"
+msgstr ""
+
+#: block.js:971
+msgid "Toggle"
+msgstr ""
+
+#: block.js:979
+msgid "Saved Toplist"
+msgstr ""
+
+#: block.js:986
+msgid "Edit your toplist using one line per item:"
+msgstr ""
+
+#: block.js:991
+msgid "Optional first row: use field names as header directives. Prefix with - or ! to exclude (example: operator|product|-terms|-bullets|href)."
+msgstr ""
+
+#: block.js:997
+msgid "Items"
+msgstr ""
+
+#: block.js:1008
+msgid "Use | between columns and ; for bullets/payments/games/withdrawals."
+msgstr ""
+
+#: block.js:1012
+msgid "Add example row"
+msgstr ""
+
+#: block.js:1016
+msgid "Clear"
+msgstr ""
+
+#: block.js:1026
+msgid "Import JSON…"
+msgstr ""
+
+#: block.js:1034
+msgid "Export JSON"
+msgstr ""
+
+#: block.js:1052
+msgid "Invalid JSON: expected an array."
+msgstr ""
+
+#: block.js:1056
+msgid "No valid casino rows found in JSON."
+msgstr ""
+
+#: block.js:1059
+msgid "Replace the current list with this JSON file?"
+msgstr ""
+
+#: block.js:1063
+msgid "Imported from JSON."
+msgstr ""
+
+#: block.js:1066
+msgid "Could not read the selected file."
+msgstr ""
+
+#: block.js:1075
+msgid "Preview (simplified)"
+msgstr ""

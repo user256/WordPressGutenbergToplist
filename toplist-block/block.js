@@ -325,6 +325,7 @@
 		}).join('\n');
 	}
 
+	/* @toplist-premium-start */
 	function externalJsonStringList(value) {
 		if (Array.isArray(value)) {
 			return value.map(function (x) { return String(x || '').trim(); }).filter(Boolean);
@@ -480,6 +481,7 @@
 		a.click();
 		URL.revokeObjectURL(url);
 	}
+	/* @toplist-premium-end */
 
 	blocks.registerBlockType('toplist/rankings', {
 		apiVersion: 2,
@@ -511,8 +513,11 @@
 			showWithdrawals: { type: 'boolean', default: true },
 			fieldIncludes: { type: 'array', default: [] },
 			fieldExcludes: { type: 'array', default: [] },
+			/* @toplist-premium-start */
 			savedToplistId: { type: 'number', default: 0 },
 			savedToplistMode: { type: 'string', default: 'linked' },
+			schemaEnabled: { type: 'boolean', default: false },
+			/* @toplist-premium-end */
 			defaultHeaderMode: { type: 'string', default: 'global' },
 			defaultHeaderRow: { type: 'string', default: '' },
 			headingMode: { type: 'string', default: 'global' },
@@ -526,6 +531,7 @@
 				defaultCtaText: attrs.defaultCtaText,
 				defaultReadReviewText: attrs.defaultReadReviewText
 			});
+			/* @toplist-premium-start */
 			var [savedLists, setSavedLists] = useState([]);
 			var [isLoadingLists, setIsLoadingLists] = useState(false);
 			var [isLoadingSaved, setIsLoadingSaved] = useState(false);
@@ -533,6 +539,7 @@
 			var [statusText, setStatusText] = useState('');
 			var jsonInputRef = useRef(null);
 			var loadRequestEpoch = useRef(0);
+			/* @toplist-premium-end */
 
 			function getEffectiveDefaultHeaderRow(overrides) {
 				var mode = (overrides && overrides.defaultHeaderMode) || attrs.defaultHeaderMode || 'global';
@@ -562,6 +569,7 @@
 				}, extraAttrs || {}));
 			}
 
+			/* @toplist-premium-start */
 			function fetchSavedLists() {
 				setIsLoadingLists(true);
 				apiFetch({ path: '/toplist-block/v1/toplists' }).then(function (data) {
@@ -672,6 +680,7 @@
 					setIsLoadingSaved(false);
 				});
 			}
+			/* @toplist-premium-end */
 
 			function updateDefaultCtaText(value) {
 				var next = (value || '').trim() || 'Visit';
@@ -747,6 +756,7 @@
 				parseAndSet(next);
 			}
 
+			/* @toplist-premium-start */
 			useEffect(function () {
 				fetchSavedLists();
 			}, []);
@@ -817,6 +827,7 @@
 					)
 				);
 			}
+			/* @toplist-premium-end */
 
 			function renderThemeTab() {
 				return el('div', {},
@@ -926,6 +937,15 @@
 					el(CheckboxControl, { label: __('Show Small Print', 'toplist'), checked: attrs.showSmallPrint, onChange: function (v) { setAttributes({ showSmallPrint: v }); } }),
 					el(CheckboxControl, { label: __('Show Read Review', 'toplist'), checked: attrs.showReadReview, onChange: function (v) { setAttributes({ showReadReview: v }); } }),
 					el(CheckboxControl, { label: __('Show Withdrawals', 'toplist'), checked: attrs.showWithdrawals, onChange: function (v) { setAttributes({ showWithdrawals: v }); } })
+					/* @toplist-premium-start */
+					, el('hr', {})
+					, el(CheckboxControl, {
+						label: __('Output ItemList schema (JSON-LD)', 'toplist'),
+						checked: !!attrs.schemaEnabled,
+						onChange: function (v) { setAttributes({ schemaEnabled: !!v }); },
+						help: __('Adds structured data for search engines (Pro, valid license).', 'toplist')
+					})
+					/* @toplist-premium-end */
 				);
 			}
 
@@ -956,10 +976,12 @@
 				),
 
 				el('h3', { style: { marginTop: 0 } }, __('Toplist', 'toplist')),
+				/* @toplist-premium-start */
 				el('div', { style: { border: '1px solid #dcdcde', borderRadius: 4, padding: 12, marginBottom: 12, background: '#fff' } },
 					el('strong', {}, __('Saved Toplist', 'toplist')),
 					el('div', { style: { marginTop: 8 } }, renderLibraryTab())
 				),
+				/* @toplist-premium-end */
 
 				el(Notice, { status: 'info', isDismissible: false },
 					el('div', {},
@@ -978,9 +1000,11 @@
 					value: lines,
 					onChange: function (nextLines) {
 						parseAndSet(nextLines);
+						/* @toplist-premium-start */
 						if ((attrs.savedToplistId || 0) > 0 && attrs.savedToplistMode === 'linked') {
 							setAttributes({ savedToplistMode: 'copied' });
 						}
+						/* @toplist-premium-end */
 					},
 					rows: 10,
 					help: __('Use | between columns and ; for bullets/payments/games/withdrawals.', 'toplist')
@@ -992,6 +1016,7 @@
 						variant: 'tertiary',
 						onClick: function () { parseAndSet(''); }
 					}, __('Clear', 'toplist')),
+					/* @toplist-premium-start */
 					el(Button, {
 						variant: 'secondary',
 						onClick: function () {
@@ -1009,7 +1034,9 @@
 							downloadTextFile('toplist.json', JSON.stringify(rows, null, 2), 'application/json;charset=utf-8');
 						}
 					}, __('Export JSON', 'toplist'))
+					/* @toplist-premium-end */
 				),
+				/* @toplist-premium-start */
 				el('input', {
 					type: 'file',
 					accept: '.json,application/json,application/octet-stream,.txt',
@@ -1044,6 +1071,7 @@
 						ev.target.value = '';
 					}
 				}),
+				/* @toplist-premium-end */
 
 				el('hr', {}),
 				el('strong', {}, __('Preview (simplified)', 'toplist')),
