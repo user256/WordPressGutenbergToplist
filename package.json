@@ -1,0 +1,13 @@
+{
+  "name": "toplist-block-dev",
+  "private": true,
+  "devDependencies": {
+    "@wordpress/env": "^10.19.0"
+  },
+  "scripts": {
+    "wp-env:start": "wp-env start --update",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:destroy": "wp-env destroy",
+    "test:integration:setup": "wp-env start --update && wp-env run cli wp plugin activate toplist-block"
+  }
+}

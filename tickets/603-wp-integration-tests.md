@@ -17,10 +17,10 @@ Sprint 4 added PHPUnit unit tests with stubs. Solar-form uses `@wordpress/env` f
 
 ## Acceptance criteria
 
-- [ ] `.wp-env.json` mounts `toplist-block/` (and optionally lite after build)
-- [ ] `tests/IntegrationTestCase.php` skips cleanly when Docker/wp-env unavailable
-- [ ] At least one smoke test: plugin activates and license class is loadable
-- [ ] Documented in `tests/README.md` or `docs/local-dev.md`
+- [x] `.wp-env.json` mounts `toplist-block/` (and optionally lite after build)
+- [x] `tests/IntegrationTestCase.php` skips cleanly when Docker/wp-env unavailable
+- [x] At least one smoke test: plugin activates and license class is loadable
+- [x] Documented in `tests/README.md` or `docs/local-dev.md`
 - [ ] CI job documented (optional separate workflow step; may stay manual until runners have Docker)
 
 ## Out of scope
