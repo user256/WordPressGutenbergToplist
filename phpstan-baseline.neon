@@ -1,0 +1,286 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Function toplist_add_settings_page\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Function toplist_register_settings\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Function toplist_sanitize_css\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Function toplist_sanitize_css\\(\\) has parameter \\$css with no type specified\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Function toplist_settings_page\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Offset 'created' on array\\{status\\: string, updated\\: int, created\\: int, rows\\: int, groups\\: int, upload_error\\?\\: 1\\|2\\|3\\|int\\<min, \\-1\\>\\|int\\<4, max\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Offset 'groups' on array\\{status\\: string, updated\\: int, created\\: int, rows\\: int, groups\\: int, upload_error\\?\\: 1\\|2\\|3\\|int\\<min, \\-1\\>\\|int\\<4, max\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Offset 'rows' on array\\{status\\: string, updated\\: int, created\\: int, rows\\: int, groups\\: int, upload_error\\?\\: 1\\|2\\|3\\|int\\<min, \\-1\\>\\|int\\<4, max\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Offset 'status' on array\\{status\\: string, updated\\: int, created\\: int, rows\\: int, groups\\: int, upload_error\\?\\: 1\\|2\\|3\\|int\\<min, \\-1\\>\\|int\\<4, max\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Offset 'updated' on array\\{status\\: string, updated\\: int, created\\: int, rows\\: int, groups\\: int, upload_error\\?\\: 1\\|2\\|3\\|int\\<min, \\-1\\>\\|int\\<4, max\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_attr expects string, mixed given\\.$#"
+			count: 4
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_textarea expects string, mixed given\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Parameter \\#2 \\$data of function wp_add_inline_style expects string, mixed given\\.$#"
+			count: 1
+			path: toplist-block/settings-page.php
+
+		-
+			message: "#^Cannot cast array\\|string to string\\.$#"
+			count: 4
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
+			count: 6
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_clean_list\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_decode_external_toplist_json\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_detect_header_row\\(\\) has parameter \\$parts with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_external_json_games_to_list\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_external_json_row_to_item\\(\\) has parameter \\$row with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_external_json_row_to_item\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_external_json_string_list\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_external_json_withdrawals_list\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_field_is_included\\(\\) has parameter \\$excludes with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_field_is_included\\(\\) has parameter \\$includes with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_items_to_external_json_rows\\(\\) has parameter \\$items with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_items_to_external_json_rows\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_items_to_pipe_content\\(\\) has parameter \\$defaults with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_items_to_pipe_content\\(\\) has parameter \\$items with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_normalize_directive_token\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_parse_lines_to_items\\(\\) has parameter \\$defaults with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_parse_lines_to_items\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_register_block\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_render\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_render\\(\\) has parameter \\$attributes with no type specified\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_supported_fields\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_toplists_admin_columns\\(\\) has parameter \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Function toplist_toplists_admin_columns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Offset 'name' on array\\{name\\: string, post_id\\: int, rows\\: non\\-empty\\-array\\<int\\<0, max\\>, non\\-falsy\\-string\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Offset 'post_id' on array\\{name\\: string, post_id\\: int, rows\\: non\\-empty\\-array\\<int\\<0, max\\>, non\\-falsy\\-string\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of function array_filter expects array, array\\<int, string\\>\\|false given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, string\\|null given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
+			count: 3
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fputcsv expects resource, resource\\|false given\\.$#"
+			count: 6
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_attr expects string, \\(float\\|int\\) given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_attr expects string, int given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_html expects string, \\(float\\|int\\) given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_html expects string, int\\|string\\|false given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_html expects string, string\\|null given\\.$#"
+			count: 2
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function wp_strip_all_tags expects string, mixed given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#2 \\$callback of function array_filter expects \\(callable\\(string\\)\\: bool\\)\\|null, 'strlen' given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#4 \\$ver of function wp_register_script expects bool\\|string\\|null, int\\|false given\\.$#"
+			count: 2
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Parameter \\#4 \\$ver of function wp_register_style expects bool\\|string\\|null, int\\|false given\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Variable \\$has_rating might not be defined\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php
+
+		-
+			message: "#^Variable \\$has_regulator might not be defined\\.$#"
+			count: 1
+			path: toplist-block/toplist-block.php

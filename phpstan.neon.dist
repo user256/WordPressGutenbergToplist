@@ -1,0 +1,17 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 9
+
+    paths:
+        - toplist-block/toplist-block.php
+        - toplist-block/settings-page.php
+        - toplist-block/includes
+
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
+
+    # Legacy procedural plugin — ratchet file-by-file; baseline shrinks per ticket.
+    reportUnmatchedIgnoredErrors: false
