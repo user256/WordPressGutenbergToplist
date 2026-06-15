@@ -31,8 +31,9 @@ class Toplist_Block_License {
 	 * @return string
 	 */
 	public static function api_url(): string {
-		if (defined('TOPLIST_BLOCK_LICENSE_API_URL') && TOPLIST_BLOCK_LICENSE_API_URL !== '') {
-			return (string) TOPLIST_BLOCK_LICENSE_API_URL;
+		$from_const = Toplist_Block_Util::configured_constant('TOPLIST_BLOCK_LICENSE_API_URL');
+		if ($from_const !== '') {
+			return $from_const;
 		}
 		$filtered = apply_filters('toplist_block_license_api_url', '');
 		return is_string($filtered) ? $filtered : '';
@@ -44,8 +45,9 @@ class Toplist_Block_License {
 	 * @return string
 	 */
 	public static function api_key(): string {
-		if (defined('TOPLIST_BLOCK_LICENSE_API_KEY') && TOPLIST_BLOCK_LICENSE_API_KEY !== '') {
-			return (string) TOPLIST_BLOCK_LICENSE_API_KEY;
+		$from_const = Toplist_Block_Util::configured_constant('TOPLIST_BLOCK_LICENSE_API_KEY');
+		if ($from_const !== '') {
+			return $from_const;
 		}
 		$filtered = apply_filters('toplist_block_license_api_key', '');
 		return is_string($filtered) ? $filtered : '';
@@ -57,8 +59,9 @@ class Toplist_Block_License {
 	 * @return string
 	 */
 	public static function update_check_api_url(): string {
-		if (defined('TOPLIST_BLOCK_UPDATE_API_URL') && TOPLIST_BLOCK_UPDATE_API_URL !== '') {
-			return (string) TOPLIST_BLOCK_UPDATE_API_URL;
+		$from_const = Toplist_Block_Util::configured_constant('TOPLIST_BLOCK_UPDATE_API_URL');
+		if ($from_const !== '') {
+			return $from_const;
 		}
 		$filtered = apply_filters('toplist_block_update_api_url', '');
 		if (is_string($filtered) && $filtered !== '') {
@@ -90,8 +93,8 @@ class Toplist_Block_License {
 	 * @return string
 	 */
 	public static function get_key(): string {
-		$stored = (string) get_option(self::OPTION_KEY, '');
-		return self::decrypt_secret($stored);
+		$stored = get_option(self::OPTION_KEY, '');
+		return self::decrypt_secret(is_string($stored) ? $stored : '');
 	}
 
 	/**
@@ -114,11 +117,11 @@ class Toplist_Block_License {
 			return base64_encode($plain);
 		}
 		$iv = openssl_random_pseudo_bytes(16);
-		if ($iv === false) {
+		if (!is_string($iv) || $iv === '') {
 			return base64_encode($plain);
 		}
 		$encrypted = openssl_encrypt($plain, 'AES-256-CBC', hash('sha256', wp_salt('auth'), true), OPENSSL_RAW_DATA, $iv);
-		if ($encrypted === false) {
+		if (!is_string($encrypted)) {
 			return base64_encode($plain);
 		}
 		return base64_encode($iv . $encrypted);
@@ -137,7 +140,7 @@ class Toplist_Block_License {
 			return '';
 		}
 		if (!function_exists('openssl_decrypt') || strlen($raw) <= 16) {
-			return is_string($raw) ? $raw : '';
+			return $raw;
 		}
 		$iv = substr($raw, 0, 16);
 		$ciphertext = substr($raw, 16);
@@ -167,8 +170,8 @@ class Toplist_Block_License {
 	public static function get_cache(): array {
 		$option = get_option(self::CACHE_OPTION, false);
 		if (is_array($option) && isset($option['payload'], $option['sig'])) {
-			$payload = (string) $option['payload'];
-			$sig = (string) $option['sig'];
+			$payload = Toplist_Block_Util::as_string($option['payload']);
+			$sig = Toplist_Block_Util::as_string($option['sig']);
 			if (hash_equals(self::sign_payload($payload), $sig)) {
 				$data = json_decode($payload, true);
 				self::$cache_trusted = true;
@@ -280,7 +283,7 @@ class Toplist_Block_License {
 			return (int) $grace_hours * HOUR_IN_SECONDS;
 		}
 
-		$billing = strtolower(trim((string) ($cache['billing_period'] ?? '')));
+		$billing = strtolower(trim(Toplist_Block_Util::array_string($cache, 'billing_period')));
 		if ($billing === 'monthly') {
 			return 3 * DAY_IN_SECONDS;
 		}
@@ -312,12 +315,12 @@ class Toplist_Block_License {
 
 		self::maybe_kick_stale_recheck($cache);
 
-		$status = (string) ($cache['status'] ?? '');
+		$status = Toplist_Block_Util::array_string($cache, 'status');
 
 		if (in_array($status, array('active', 'grace'), true)) {
 			$expires = $cache['expires_at'] ?? null;
 			if ($expires !== null && $expires !== '') {
-				$t = strtotime((string) $expires);
+				$t = strtotime(Toplist_Block_Util::as_string($expires));
 				if ($t !== false && $t < time()) {
 					return false;
 				}
@@ -342,7 +345,7 @@ class Toplist_Block_License {
 		}
 
 		if ($status === 'unreachable') {
-			$last_valid = (string) ($cache['last_valid_at'] ?? '');
+			$last_valid = Toplist_Block_Util::array_string($cache, 'last_valid_at');
 			if ($last_valid !== '') {
 				$lv = strtotime($last_valid);
 				if ($lv !== false && (time() - $lv) < self::grace_seconds($cache)) {
@@ -358,7 +361,8 @@ class Toplist_Block_License {
 	 * @return string
 	 */
 	public static function current_install_domain(): string {
-		$host = (string) wp_parse_url(home_url('/'), PHP_URL_HOST);
+		$host = wp_parse_url(home_url('/'), PHP_URL_HOST);
+		$host = is_string($host) ? $host : '';
 		return strtolower((string) preg_replace('#^www\.#', '', $host));
 	}
 
@@ -370,7 +374,7 @@ class Toplist_Block_License {
 		if (isset($c['allowed_domains']) && is_array($c['allowed_domains'])) {
 			return array_values(array_map('strval', $c['allowed_domains']));
 		}
-		$primary = (string) ($c['primary_domain'] ?? '');
+		$primary = Toplist_Block_Util::array_string($c, 'primary_domain');
 		$extras = isset($c['extra_domains']) && is_array($c['extra_domains'])
 			? array_values(array_map('strval', $c['extra_domains']))
 			: array();
@@ -415,14 +419,14 @@ class Toplist_Block_License {
 	private static function api_error_fields(array $decoded): array {
 		if (isset($decoded['error']) && is_array($decoded['error'])) {
 			return array(
-				'code' => (string) ($decoded['error']['code'] ?? 'unknown'),
-				'message' => (string) ($decoded['error']['message'] ?? __('License check failed.', 'toplist')),
+				'code' => Toplist_Block_Util::array_string($decoded['error'], 'code') !== '' ? Toplist_Block_Util::array_string($decoded['error'], 'code') : 'unknown',
+				'message' => Toplist_Block_Util::array_string($decoded['error'], 'message') !== '' ? Toplist_Block_Util::array_string($decoded['error'], 'message') : __('License check failed.', 'toplist'),
 			);
 		}
 		if (!empty($decoded['error']) && isset($decoded['code'])) {
 			return array(
-				'code' => (string) $decoded['code'],
-				'message' => (string) ($decoded['message'] ?? __('License check failed.', 'toplist')),
+				'code' => Toplist_Block_Util::as_string($decoded['code']),
+				'message' => Toplist_Block_Util::array_string($decoded, 'message') !== '' ? Toplist_Block_Util::array_string($decoded, 'message') : __('License check failed.', 'toplist'),
 			);
 		}
 		return array(
@@ -470,7 +474,7 @@ class Toplist_Block_License {
 			array(
 				'timeout' => 15,
 				'headers' => $headers,
-				'body' => wp_json_encode($body),
+				'body' => Toplist_Block_Util::json_encode_body($body),
 			)
 		);
 
@@ -508,33 +512,39 @@ class Toplist_Block_License {
 
 		$data = self::api_success_data($decoded);
 		if (is_array($data)) {
-			$api_status = strtolower((string) ($data['status'] ?? 'active'));
+			$api_status = strtolower(Toplist_Block_Util::array_string($data, 'status'));
+			if ($api_status === '') {
+				$api_status = 'active';
+			}
 			$local_status = $api_status === 'grace' ? 'grace' : 'active';
 
 			$extras = isset($data['extra_domains']) && is_array($data['extra_domains'])
-				? array_values(array_map('strval', $data['extra_domains']))
+				? array_values(array_map(array(Toplist_Block_Util::class, 'as_string'), $data['extra_domains']))
 				: array();
 			$allowed = isset($data['allowed_domains']) && is_array($data['allowed_domains'])
-				? array_values(array_map('strval', $data['allowed_domains']))
+				? array_values(array_map(array(Toplist_Block_Util::class, 'as_string'), $data['allowed_domains']))
 				: array();
 			if ($allowed === array()) {
-				$primary = (string) ($data['primary_domain'] ?? '');
+				$primary = Toplist_Block_Util::array_string($data, 'primary_domain');
 				$allowed = array_values(array_unique(array_merge($primary !== '' ? array($primary) : array(), $extras)));
 			}
+
+			$recheck_after = $data['recheck_after'] ?? null;
+			$grace_hours = $data['grace_hours'] ?? null;
 
 			$cache = array(
 				'status' => $local_status,
 				'checked_at' => $now,
 				'last_valid_at' => $now,
 				'expires_at' => $data['expires_at'] ?? null,
-				'recheck_after' => isset($data['recheck_after']) && is_string($data['recheck_after']) ? $data['recheck_after'] : null,
-				'grace_hours' => isset($data['grace_hours']) && is_numeric($data['grace_hours']) ? (int) $data['grace_hours'] : null,
-				'key_last4' => (string) ($data['license_key_last4'] ?? ''),
-				'billing_period' => (string) ($data['billing_period'] ?? ''),
-				'approved_at' => (string) ($data['approved_at'] ?? ''),
-				'bearer_token' => (string) ($data['bearer_token'] ?? ''),
-				'license_scope' => (string) ($data['license_scope'] ?? 'single'),
-				'primary_domain' => (string) ($data['primary_domain'] ?? ''),
+				'recheck_after' => is_string($recheck_after) ? $recheck_after : null,
+				'grace_hours' => is_numeric($grace_hours) ? (int) $grace_hours : null,
+				'key_last4' => Toplist_Block_Util::array_string($data, 'license_key_last4'),
+				'billing_period' => Toplist_Block_Util::array_string($data, 'billing_period'),
+				'approved_at' => Toplist_Block_Util::array_string($data, 'approved_at'),
+				'bearer_token' => Toplist_Block_Util::array_string($data, 'bearer_token'),
+				'license_scope' => Toplist_Block_Util::array_string($data, 'license_scope') !== '' ? Toplist_Block_Util::array_string($data, 'license_scope') : 'single',
+				'primary_domain' => Toplist_Block_Util::array_string($data, 'primary_domain'),
 				'extra_domains' => $extras,
 				'allowed_domains' => $allowed,
 			);
@@ -556,8 +566,8 @@ class Toplist_Block_License {
 		$cache = array(
 			'status' => $local_status,
 			'checked_at' => $now,
-			'last_valid_at' => $existing['last_valid_at'] ?? '',
-			'billing_period' => (string) ($existing['billing_period'] ?? ''),
+			'last_valid_at' => Toplist_Block_Util::array_string($existing, 'last_valid_at'),
+			'billing_period' => Toplist_Block_Util::array_string($existing, 'billing_period'),
 			'grace_hours' => isset($existing['grace_hours']) && is_numeric($existing['grace_hours']) ? (int) $existing['grace_hours'] : null,
 			'error_code' => $error_code,
 			'error_message' => $error_msg,
@@ -576,12 +586,12 @@ class Toplist_Block_License {
 	 */
 	public static function schedule_from_cache(): void {
 		$cache = self::get_cache();
-		$status = (string) ($cache['status'] ?? '');
-		$billing = (string) ($cache['billing_period'] ?? '');
+		$status = Toplist_Block_Util::array_string($cache, 'status');
+		$billing = Toplist_Block_Util::array_string($cache, 'billing_period');
 		$recheck_after = $cache['recheck_after'] ?? null;
 
-		if (in_array($status, array('active', 'grace'), true) && $recheck_after !== null) {
-			$at = strtotime((string) $recheck_after);
+		if (in_array($status, array('active', 'grace'), true) && $recheck_after !== null && $recheck_after !== '') {
+			$at = strtotime(Toplist_Block_Util::as_string($recheck_after));
 			if ($at !== false && $at > time()) {
 				wp_clear_scheduled_hook(self::CRON_HOOK);
 				wp_schedule_single_event($at, self::CRON_HOOK);
@@ -602,7 +612,8 @@ class Toplist_Block_License {
 		}
 
 		if ($status === 'invalid') {
-			$tries = (int) ($cache['invalid_retry_count'] ?? 0);
+			$retry_raw = $cache['invalid_retry_count'] ?? 0;
+			$tries = is_numeric($retry_raw) ? (int) $retry_raw : 0;
 			if ($tries < 1) {
 				$cache['invalid_retry_count'] = $tries + 1;
 				self::save_cache($cache);

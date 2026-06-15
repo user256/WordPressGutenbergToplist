@@ -32,6 +32,7 @@ function toplist_load_textdomain(): void
 }
 
 // @toplist-premium-start
+require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-util.php';
 require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-license.php';
 require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-license-admin.php';
 require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-updater.php';

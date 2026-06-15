@@ -85,13 +85,17 @@ class Toplist_Block_License_Admin {
 	 * @return void
 	 */
 	private static function redirect_with_result(array $result): void {
-		$status = (string) ($result['status'] ?? 'invalid');
+		$status = Toplist_Block_Util::array_string($result, 'status');
+		if ($status === '') {
+			$status = 'invalid';
+		}
 		if (in_array($status, array('active', 'grace'), true)) {
 			$status = 'active';
 		}
 		$args = array('toplist_license_status' => $status);
-		if ($status !== 'active' && !empty($result['message'])) {
-			$args['toplist_license_msg'] = rawurlencode((string) $result['message']);
+		$message = Toplist_Block_Util::array_string($result, 'message');
+		if ($status !== 'active' && $message !== '') {
+			$args['toplist_license_msg'] = rawurlencode($message);
 		}
 		wp_safe_redirect(add_query_arg($args, self::settings_url()));
 		exit;
@@ -163,7 +167,7 @@ class Toplist_Block_License_Admin {
 		}
 
 		$cache = Toplist_Block_License::get_cache();
-		$status = (string) ($cache['status'] ?? '');
+		$status = Toplist_Block_Util::array_string($cache, 'status');
 		$valid = Toplist_Block_License::is_valid();
 		$next = wp_next_scheduled(Toplist_Block_License::CRON_HOOK);
 		?>
@@ -184,13 +188,13 @@ class Toplist_Block_License_Admin {
 				<?php else : ?>
 					<strong style="color:#b32d2e;">&#9675; <?php esc_html_e('Pro inactive', 'toplist'); ?></strong>
 				<?php endif; ?>
-				<?php if (!empty($cache['key_last4'])) : ?>
-					<span>…<?php echo esc_html((string) $cache['key_last4']); ?></span>
+				<?php if (Toplist_Block_Util::array_string($cache, 'key_last4') !== '') : ?>
+					<span>…<?php echo esc_html(Toplist_Block_Util::array_string($cache, 'key_last4')); ?></span>
 				<?php endif; ?>
-				<?php if (!empty($cache['expires_at'])) : ?>
-					<span><?php printf(esc_html__('Expires %s', 'toplist'), esc_html(gmdate('Y-m-d', (int) strtotime((string) $cache['expires_at'])))); ?></span>
-				<?php elseif (!empty($cache['billing_period'])) : ?>
-					<span><?php echo esc_html(ucfirst((string) $cache['billing_period'])); ?></span>
+				<?php if (Toplist_Block_Util::array_string($cache, 'expires_at') !== '') : ?>
+					<span><?php printf(esc_html__('Expires %s', 'toplist'), esc_html(gmdate('Y-m-d', (int) strtotime(Toplist_Block_Util::array_string($cache, 'expires_at'))))); ?></span>
+				<?php elseif (Toplist_Block_Util::array_string($cache, 'billing_period') !== '') : ?>
+					<span><?php echo esc_html(ucfirst(Toplist_Block_Util::array_string($cache, 'billing_period'))); ?></span>
 				<?php endif; ?>
 			</p>
 			<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">

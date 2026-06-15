@@ -48,6 +48,7 @@ const TOPLIST_DIST_EXCLUDE = array(
 const TOPLIST_PREMIUM_DELETE_FILES = array(
 	'admin-diagnostics.php',
 	'check-plugin.php',
+	'includes/class-toplist-block-util.php',
 	'includes/class-toplist-block-license.php',
 	'includes/class-toplist-block-license-admin.php',
 	'includes/class-toplist-block-updater.php',

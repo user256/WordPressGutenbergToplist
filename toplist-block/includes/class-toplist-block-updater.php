@@ -61,25 +61,33 @@ class Toplist_Block_Updater {
 			return $transient;
 		}
 
-		$new_version = (string) ($remote['new_version'] ?? $remote['version'] ?? '');
-		$package = (string) ($remote['package'] ?? $remote['download_url'] ?? '');
+		$new_version = Toplist_Block_Util::array_string($remote, 'new_version');
+		if ($new_version === '') {
+			$new_version = Toplist_Block_Util::array_string($remote, 'version');
+		}
+		$package = Toplist_Block_Util::array_string($remote, 'package');
+		if ($package === '') {
+			$package = Toplist_Block_Util::array_string($remote, 'download_url');
+		}
 		if ($new_version === '' || $package === '') {
 			return $transient;
 		}
 
-		if (!version_compare((string) $transient->checked[$plugin_file], $new_version, '<')) {
+		if (!version_compare(Toplist_Block_Util::as_string($transient->checked[$plugin_file]), $new_version, '<')) {
 			return $transient;
 		}
 
-		$transient->response[$plugin_file] = (object) array(
-			'slug'         => (string) ($remote['slug'] ?? self::PLUGIN_SLUG),
+		$response_map = Toplist_Block_Util::transient_response_map($transient);
+		$response_map[$plugin_file] = (object) array(
+			'slug'         => Toplist_Block_Util::array_string($remote, 'slug') !== '' ? Toplist_Block_Util::array_string($remote, 'slug') : self::PLUGIN_SLUG,
 			'plugin'       => $plugin_file,
 			'new_version'  => $new_version,
-			'url'          => (string) ($remote['homepage'] ?? ''),
+			'url'          => Toplist_Block_Util::array_string($remote, 'homepage'),
 			'package'      => $package,
-			'tested'       => (string) ($remote['tested'] ?? ''),
-			'requires_php' => (string) ($remote['requires_php'] ?? '7.4'),
+			'tested'       => Toplist_Block_Util::array_string($remote, 'tested'),
+			'requires_php' => Toplist_Block_Util::array_string($remote, 'requires_php') !== '' ? Toplist_Block_Util::array_string($remote, 'requires_php') : '7.4',
 		);
+		Toplist_Block_Util::set_transient_response_map($transient, $response_map);
 
 		return $transient;
 	}
@@ -110,20 +118,28 @@ class Toplist_Block_Updater {
 		}
 
 		$sections = isset($remote['sections']) && is_array($remote['sections']) ? $remote['sections'] : array();
+		$homepage = Toplist_Block_Util::array_string($remote, 'homepage');
+		$new_version = Toplist_Block_Util::array_string($remote, 'new_version');
+		if ($new_version === '') {
+			$new_version = Toplist_Block_Util::array_string($remote, 'version');
+		}
+		if ($new_version === '') {
+			$new_version = TOPLIST_BLOCK_VERSION;
+		}
 		$info = (object) array(
-			'name'          => (string) ($remote['name'] ?? 'Toplist Block Pro'),
+			'name'          => Toplist_Block_Util::array_string($remote, 'name') !== '' ? Toplist_Block_Util::array_string($remote, 'name') : 'Toplist Block Pro',
 			'slug'          => self::PLUGIN_SLUG,
-			'version'       => (string) ($remote['new_version'] ?? $remote['version'] ?? TOPLIST_BLOCK_VERSION),
-			'author'        => '<a href="' . esc_url((string) ($remote['homepage'] ?? '')) . '">Toplist Block Pro</a>',
-			'homepage'      => (string) ($remote['homepage'] ?? ''),
-			'download_link' => (string) ($remote['package'] ?? $remote['download_url'] ?? ''),
-			'requires'      => (string) ($remote['requires'] ?? '6.0'),
-			'tested'        => (string) ($remote['tested'] ?? ''),
-			'requires_php'  => (string) ($remote['requires_php'] ?? '7.4'),
-			'last_updated'  => (string) ($remote['last_updated'] ?? gmdate('Y-m-d')),
+			'version'       => $new_version,
+			'author'        => '<a href="' . esc_url($homepage) . '">Toplist Block Pro</a>',
+			'homepage'      => $homepage,
+			'download_link' => Toplist_Block_Util::array_string($remote, 'package') !== '' ? Toplist_Block_Util::array_string($remote, 'package') : Toplist_Block_Util::array_string($remote, 'download_url'),
+			'requires'      => Toplist_Block_Util::array_string($remote, 'requires') !== '' ? Toplist_Block_Util::array_string($remote, 'requires') : '6.0',
+			'tested'        => Toplist_Block_Util::array_string($remote, 'tested'),
+			'requires_php'  => Toplist_Block_Util::array_string($remote, 'requires_php') !== '' ? Toplist_Block_Util::array_string($remote, 'requires_php') : '7.4',
+			'last_updated'  => Toplist_Block_Util::array_string($remote, 'last_updated') !== '' ? Toplist_Block_Util::array_string($remote, 'last_updated') : gmdate('Y-m-d'),
 			'sections'      => array(
-				'description' => (string) ($sections['description'] ?? '<p>Toplist Block Pro premium plugin.</p>'),
-				'changelog'   => (string) ($sections['changelog'] ?? '<p>See portal account for release notes.</p>'),
+				'description' => Toplist_Block_Util::array_string($sections, 'description') !== '' ? Toplist_Block_Util::array_string($sections, 'description') : '<p>Toplist Block Pro premium plugin.</p>',
+				'changelog'   => Toplist_Block_Util::array_string($sections, 'changelog') !== '' ? Toplist_Block_Util::array_string($sections, 'changelog') : '<p>See portal account for release notes.</p>',
 			),
 		);
 
@@ -157,7 +173,7 @@ class Toplist_Block_Updater {
 			array(
 				'timeout' => 15,
 				'headers' => Toplist_Block_License::api_request_headers(),
-				'body'    => wp_json_encode($body),
+				'body'    => Toplist_Block_Util::json_encode_body($body),
 			)
 		);
 
