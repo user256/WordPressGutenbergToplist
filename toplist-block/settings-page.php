@@ -236,6 +236,9 @@ function toplist_settings_page()
             } elseif ($bulk_import_status === 'failed') {
                 $notice_class = 'notice notice-error';
                 $notice_message = 'Bulk CSV import failed: unable to read uploaded file.';
+            } elseif ($bulk_import_status === 'invalid_type') {
+                $notice_class = 'notice notice-error';
+                $notice_message = 'Bulk CSV import failed: upload must be a .csv file.';
             } elseif ($bulk_import_status === 'upload_too_large') {
                 $notice_class = 'notice notice-error';
                 $notice_message = 'Bulk CSV import failed: uploaded file is too large for current PHP upload limits.';

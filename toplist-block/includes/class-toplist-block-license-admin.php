@@ -216,6 +216,13 @@ class Toplist_Block_License_Admin {
 			<?php endif; ?>
 			<p class="description" style="margin-bottom:0;">
 				<?php esc_html_e('Local toplist blocks keep working without a license. Library, import, and linked lists require Pro.', 'toplist'); ?>
+				<?php
+				$allowed = Toplist_Block_License::get_allowed_domains();
+				if ($allowed !== array()) :
+					?>
+					<br><?php esc_html_e('Licensed for:', 'toplist'); ?> <code><?php echo esc_html(implode(', ', $allowed)); ?></code>.
+					<?php esc_html_e('Add staging or satellite domains in your portal account before using this key on other hosts.', 'toplist'); ?>
+				<?php endif; ?>
 			</p>
 		</div>
 		<?php

@@ -229,6 +229,37 @@ if (!function_exists('current_user_can')) {
 	}
 }
 
+if (!function_exists('wp_kses_post')) {
+	function wp_kses_post(string $data): string {
+		return strip_tags($data);
+	}
+}
+
+if (!function_exists('sanitize_file_name')) {
+	function sanitize_file_name(string $filename): string {
+		return $filename;
+	}
+}
+
+if (!function_exists('is_uploaded_file')) {
+	function is_uploaded_file(string $filename): bool {
+		return $filename !== '' && is_file($filename);
+	}
+}
+
+if (!function_exists('wp_check_filetype')) {
+	function wp_check_filetype(string $filename, $mimes = null): array {
+		$ext = strtolower((string) pathinfo($filename, PATHINFO_EXTENSION));
+		if (!is_array($mimes)) {
+			return array('ext' => $ext, 'type' => '');
+		}
+		if (isset($mimes[$ext])) {
+			return array('ext' => $ext, 'type' => (string) $mimes[$ext]);
+		}
+		return array('ext' => '', 'type' => '');
+	}
+}
+
 if (!function_exists('is_admin')) {
 	function is_admin(): bool {
 		return false;

@@ -17,9 +17,9 @@ A documented script (or CI workflow) publishes `toplist-block-lite/` to WP.org S
 
 ## Acceptance criteria
 
-- [ ] `scripts/deploy-wporg.sh` (or workflow) documents required secrets (`WPORG_SVN_USER`, app password)
-- [ ] Dry-run mode lists files that would be committed
-- [ ] Tag created from `Version:` in lite `toplist-block-lite.php`
+- [x] `scripts/deploy-wporg.sh` (or workflow) documents required secrets (`WPORG_SVN_USER`, app password)
+- [x] Dry-run mode lists files that would be committed
+- [x] Tag created from `Version:` in lite `toplist-block-lite.php`
 - [ ] `assets/` banner/icon copy steps documented if not automated
 - [ ] Does not publish premium `toplist-block/` sources
 

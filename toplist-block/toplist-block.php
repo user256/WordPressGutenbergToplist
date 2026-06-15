@@ -879,7 +879,7 @@ function toplist_register_rest_routes()
 		),
 		'callback' => function ($request) {
 			$name = sanitize_text_field((string) $request->get_param('name'));
-			$content = (string) $request->get_param('content');
+			$content = wp_kses_post((string) $request->get_param('content'));
 			if ($name === '') {
 				return new WP_Error('toplist_invalid_name', __('Toplist name is required.', 'toplist'), array('status' => 400));
 			}
@@ -888,7 +888,7 @@ function toplist_register_rest_routes()
 				'post_type' => 'toplist_list',
 				'post_title' => $name,
 				'post_content' => $content,
-				'post_status' => 'publish',
+				'post_status' => current_user_can('publish_posts') ? 'publish' : 'draft',
 			), true);
 
 			if (is_wp_error($post_id)) {
@@ -1246,6 +1246,79 @@ function toplist_handle_export_json()
 }
 
 /**
+ * Whether an upload filename matches the expected extension and MIME map.
+ *
+ * @param string $filename Original upload name.
+ * @param string $extension Expected extension without dot (json|csv).
+ * @return bool
+ */
+function toplist_upload_filename_matches_extension($filename, $extension)
+{
+	$filename = is_string($filename) ? $filename : '';
+	$extension = strtolower(is_string($extension) ? $extension : '');
+	if ($filename === '' || !in_array($extension, array('json', 'csv'), true)) {
+		return false;
+	}
+
+	$ext = strtolower((string) pathinfo($filename, PATHINFO_EXTENSION));
+	if ($ext !== $extension) {
+		return false;
+	}
+
+	$mimes = $extension === 'json'
+		? array('json' => 'application/json')
+		: array('csv' => 'text/csv', 'txt' => 'text/plain');
+	$checked = wp_check_filetype($filename, $mimes);
+	if (!empty($checked['ext']) && $checked['ext'] === $ext) {
+		return true;
+	}
+
+	// Excel and some hosts label CSV uploads as text/plain.
+	if ($extension === 'csv') {
+		$plain = wp_check_filetype($filename, array('csv' => 'text/plain'));
+		return !empty($plain['ext']) && $plain['ext'] === 'csv';
+	}
+
+	return false;
+}
+
+/**
+ * Validate a $_FILES upload entry for import handlers.
+ *
+ * @param string $files_key $_FILES key.
+ * @param string $extension Expected extension without dot (json|csv).
+ * @return string Empty when valid; otherwise error code for redirects.
+ */
+function toplist_validate_uploaded_import_file($files_key, $extension)
+{
+	$files_key = is_string($files_key) ? $files_key : '';
+	if ($files_key === '' || !isset($_FILES[$files_key]) || !is_array($_FILES[$files_key])) {
+		return 'empty';
+	}
+
+	$file = $_FILES[$files_key];
+	$tmp = isset($file['tmp_name']) ? (string) $file['tmp_name'] : '';
+	if ($tmp === '' || !is_uploaded_file($tmp)) {
+		return 'empty';
+	}
+
+	$error = isset($file['error']) ? (int) $file['error'] : UPLOAD_ERR_NO_FILE;
+	if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
+		return 'upload_too_large';
+	}
+	if ($error !== UPLOAD_ERR_OK) {
+		return 'failed';
+	}
+
+	$name = isset($file['name']) ? sanitize_file_name((string) wp_unslash($file['name'])) : '';
+	if (!toplist_upload_filename_matches_extension($name, $extension)) {
+		return 'invalid_type';
+	}
+
+	return '';
+}
+
+/**
  * Import JSON (toplist.json schema) into one saved toplist.
  *
  * @return void
@@ -1259,8 +1332,9 @@ function toplist_handle_import_json()
 	if (!isset($_POST['toplist_import_json_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['toplist_import_json_nonce'])), 'toplist_import_json_' . $post_id)) {
 		wp_die(esc_html__('Invalid JSON import request.', 'toplist'));
 	}
-	if (empty($_FILES['toplist_json_file']['tmp_name'])) {
-		wp_safe_redirect(add_query_arg('toplist_json_import', 'empty', get_edit_post_link($post_id, '')));
+	$upload_status = toplist_validate_uploaded_import_file('toplist_json_file', 'json');
+	if ($upload_status !== '') {
+		wp_safe_redirect(add_query_arg('toplist_json_import', $upload_status, get_edit_post_link($post_id, '')));
 		exit;
 	}
 
@@ -1575,6 +1649,19 @@ function toplist_handle_import_all_csv()
 	check_admin_referer('toplist_import_all_csv', 'toplist_import_all_csv_nonce');
 
 	$redirect_url = admin_url('options-general.php?page=toplist-settings');
+	$upload_status = toplist_validate_uploaded_import_file('toplist_bulk_csv_file', 'csv');
+	if ($upload_status !== '') {
+		wp_safe_redirect(add_query_arg(array(
+			'toplist_bulk_import' => $upload_status,
+			'toplist_bulk_updated' => 0,
+			'toplist_bulk_created' => 0,
+			'toplist_bulk_rows' => 0,
+			'toplist_bulk_groups' => 0,
+			'toplist_bulk_upload_error' => isset($_FILES['toplist_bulk_csv_file']['error']) ? (int) $_FILES['toplist_bulk_csv_file']['error'] : 0,
+		), $redirect_url));
+		exit;
+	}
+
 	$result = toplist_process_bulk_import_csv_file($_FILES['toplist_bulk_csv_file']['tmp_name'] ?? '');
 	$upload_error = isset($_FILES['toplist_bulk_csv_file']['error']) ? (int) $_FILES['toplist_bulk_csv_file']['error'] : 0;
 	wp_safe_redirect(add_query_arg(array(
@@ -1657,8 +1744,9 @@ function toplist_handle_import_csv()
 	if (!isset($_POST['toplist_import_csv_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['toplist_import_csv_nonce'])), 'toplist_import_csv_' . $post_id)) {
 		wp_die(esc_html__('Invalid CSV import request.', 'toplist'));
 	}
-	if (empty($_FILES['toplist_csv_file']['tmp_name'])) {
-		wp_safe_redirect(add_query_arg('toplist_import', 'empty', get_edit_post_link($post_id, '')));
+	$upload_status = toplist_validate_uploaded_import_file('toplist_csv_file', 'csv');
+	if ($upload_status !== '') {
+		wp_safe_redirect(add_query_arg('toplist_import', $upload_status, get_edit_post_link($post_id, '')));
 		exit;
 	}
 
@@ -1752,6 +1840,12 @@ function toplist_import_admin_notice()
 		} elseif ($status === 'failed') {
 			$message = __('CSV import failed: unable to read the uploaded file.', 'toplist');
 			$class = 'notice notice-error';
+		} elseif ($status === 'invalid_type') {
+			$message = __('CSV import failed: upload must be a .csv file.', 'toplist');
+			$class = 'notice notice-error';
+		} elseif ($status === 'upload_too_large') {
+			$message = __('CSV import failed: uploaded file is too large for current PHP upload limits.', 'toplist');
+			$class = 'notice notice-error';
 		}
 
 		if ($message !== '') {
@@ -1774,6 +1868,12 @@ function toplist_import_admin_notice()
 			$json_class = 'notice notice-error';
 		} elseif ($json_status === 'invalid') {
 			$json_message = __('JSON import failed: invalid JSON (expected a JSON array).', 'toplist');
+			$json_class = 'notice notice-error';
+		} elseif ($json_status === 'invalid_type') {
+			$json_message = __('JSON import failed: upload must be a .json file.', 'toplist');
+			$json_class = 'notice notice-error';
+		} elseif ($json_status === 'upload_too_large') {
+			$json_message = __('JSON import failed: uploaded file is too large for current PHP upload limits.', 'toplist');
 			$json_class = 'notice notice-error';
 		}
 

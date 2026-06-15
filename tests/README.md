@@ -27,6 +27,8 @@ composer test:integration
 
 Integration tests skip automatically when wp-env is not running or Docker is unavailable.
 
+CI: `.github/workflows/integration.yml` runs on `workflow_dispatch` and PRs touching plugin/integration paths.
+
 Optional environment variables:
 
 | Variable | Default | Purpose |

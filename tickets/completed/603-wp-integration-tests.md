@@ -1,7 +1,7 @@
 # Ticket 603: WordPress Integration Tests
 
 **Sprint:** 6 — Post-Launch Expansion
-**Status:** In progress
+**Status:** Done
 **Owner:** unassigned
 **Estimate:** M
 
@@ -21,7 +21,7 @@ Sprint 4 added PHPUnit unit tests with stubs. Solar-form uses `@wordpress/env` f
 - [x] `tests/IntegrationTestCase.php` skips cleanly when Docker/wp-env unavailable
 - [x] At least one smoke test: plugin activates and license class is loadable
 - [x] Documented in `tests/README.md` or `docs/local-dev.md`
-- [ ] CI job documented (optional separate workflow step; may stay manual until runners have Docker)
+- [x] CI job documented (optional separate workflow step; may stay manual until runners have Docker)
 
 ## Out of scope
 

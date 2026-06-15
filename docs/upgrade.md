@@ -39,4 +39,13 @@ Only one plugin may be active:
 2. Confirm the front-end toplist still renders.
 3. With a valid license, confirm **Toplists** admin menu and library features appear.
 
+## Multisite and satellite domains
+
+Premium licenses can cover more than one hostname. The portal validate response includes `allowed_domains` (primary + extras configured in the customer account). The plugin:
+
+- Sends the current site host from `home_url()` on each validate call (per-subsite on multisite).
+- Refuses Pro features when the active site host is not in `allowed_domains`.
+
+Add satellite domains in the portal account (**Toplist Pro → Licenses**) before using the same key on staging or alternate hosts.
+
 See also: [`docs/portal-setup.md`](portal-setup.md), [`docs/free-vs-premium.md`](free-vs-premium.md).

@@ -17,10 +17,10 @@ Premium license validation accepts additional domains configured in the portal a
 
 ## Acceptance criteria
 
-- [ ] `Toplist_Block_License` treats `allowed_domains` from validate response as authoritative
-- [ ] Admin UI explains how to add satellite domains in portal account
-- [ ] Multisite: `domain` sent to validate uses the site’s `home_url` host, not only network primary
-- [ ] Documented in `docs/upgrade.md` and portal module README
+- [x] `Toplist_Block_License` treats `allowed_domains` from validate response as authoritative
+- [x] Admin UI explains how to add satellite domains in portal account
+- [x] Multisite: `domain` sent to validate uses the site’s `home_url` host, not only network primary
+- [x] Documented in `docs/upgrade.md` and portal module README
 - [ ] Unit or integration test for domain normalization edge cases
 
 ## Out of scope
