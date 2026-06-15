@@ -29,6 +29,9 @@ jobs:
       - name: PHPUnit
         run: composer test
 
+      - name: PHPStan
+        run: composer phpstan
+
       - name: Build + lite smoke tests
         run: composer test:build
 
