@@ -49,6 +49,16 @@ if [[ ! -d "${LITE_DIR}" ]]; then
   exit 1
 fi
 
+if [[ -f "${LITE_DIR}/includes/class-toplist-block-license.php" ]]; then
+  echo "Premium license file present in lite build — aborting deploy." >&2
+  exit 1
+fi
+
+if [[ -d "${LITE_DIR}/includes/pro" ]]; then
+  echo "Premium includes/pro/ present in lite build — aborting deploy." >&2
+  exit 1
+fi
+
 MAIN_FILE="${LITE_DIR}/toplist-block-lite.php"
 if [[ ! -f "${MAIN_FILE}" ]]; then
   echo "Missing ${MAIN_FILE}" >&2
