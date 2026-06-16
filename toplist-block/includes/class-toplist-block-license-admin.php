@@ -42,6 +42,16 @@ class Toplist_Block_License_Admin {
 		}
 		check_admin_referer('toplist_license_save');
 
+		if (!Toplist_Block_License::api_config_locked_by_constant()) {
+			$api_url = isset($_POST['toplist_license_api_url'])
+				? esc_url_raw(trim((string) wp_unslash($_POST['toplist_license_api_url'])))
+				: '';
+			$api_key = isset($_POST['toplist_license_api_key'])
+				? sanitize_text_field((string) wp_unslash($_POST['toplist_license_api_key']))
+				: '';
+			Toplist_Block_License::save_api_settings($api_url, $api_key);
+		}
+
 		if (!empty($_POST['toplist_license_remove'])) {
 			Toplist_Block_License::clear();
 			wp_safe_redirect(add_query_arg('toplist_license_status', 'cleared', self::settings_url()));
@@ -51,14 +61,18 @@ class Toplist_Block_License_Admin {
 		$key = isset($_POST['toplist_license_key']) ? sanitize_text_field((string) wp_unslash($_POST['toplist_license_key'])) : '';
 
 		if ($key === '') {
+			if (!empty($_POST['toplist_license_remove'])) {
+				Toplist_Block_License::clear();
+				wp_safe_redirect(add_query_arg('toplist_license_status', 'cleared', self::settings_url()));
+				exit;
+			}
 			$existing = Toplist_Block_License::get_key();
 			if ($existing !== '') {
 				$result = Toplist_Block_License::validate();
 				Toplist_Block_License::schedule_from_cache();
 				self::redirect_with_result($result);
 			}
-			Toplist_Block_License::clear();
-			wp_safe_redirect(add_query_arg('toplist_license_status', 'cleared', self::settings_url()));
+			wp_safe_redirect(add_query_arg('toplist_license_status', 'api_saved', self::settings_url()));
 			exit;
 		}
 
@@ -157,6 +171,8 @@ class Toplist_Block_License_Admin {
 				: '';
 			if ($lstat === 'active') {
 				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('License verified. Pro features are active.', 'toplist') . '</p></div>';
+			} elseif ($lstat === 'api_saved') {
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Portal connection settings saved.', 'toplist') . '</p></div>';
 			} elseif ($lstat === 'cleared') {
 				echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__('License key removed.', 'toplist') . '</p></div>';
 			} elseif (in_array($lstat, array('invalid', 'expired', 'unreachable'), true)) {
@@ -170,13 +186,22 @@ class Toplist_Block_License_Admin {
 		$status = Toplist_Block_Util::array_string($cache, 'status');
 		$valid = Toplist_Block_License::is_valid();
 		$next = wp_next_scheduled(Toplist_Block_License::CRON_HOOK);
+		$api_url = Toplist_Block_License::api_url();
+		$stored_api_url = Toplist_Block_License::get_stored_api_url();
+		$api_locked = Toplist_Block_License::api_config_locked_by_constant();
+		$has_api_key = Toplist_Block_License::api_key() !== '';
 		?>
 		<div class="toplist-license-panel" style="background:#f6f7f7;border:1px solid #c3c4c7;padding:14px 16px;margin:0 0 20px;border-radius:4px;">
 			<h2 style="margin-top:0;"><?php esc_html_e('Toplist Block Pro License', 'toplist'); ?></h2>
-			<?php if (Toplist_Block_License::api_url() === '') : ?>
-				<div class="notice notice-error inline" style="margin:0 0 12px;padding:8px 12px;">
+			<?php if ($api_locked) : ?>
+				<p class="description" style="margin:0 0 12px;">
+					<?php esc_html_e('Portal connection is locked by wp-config.php constants (TOPLIST_BLOCK_LICENSE_API_*). Remove those defines to edit here.', 'toplist'); ?>
+				</p>
+			<?php endif; ?>
+			<?php if ($api_url === '') : ?>
+				<div class="notice notice-warning inline" style="margin:0 0 12px;padding:8px 12px;">
 					<p style="margin:0;">
-						<?php esc_html_e('License API URL is not configured. Add TOPLIST_BLOCK_LICENSE_API_URL (and usually TOPLIST_BLOCK_LICENSE_API_KEY) to wp-config.php before keys can be verified.', 'toplist'); ?>
+						<?php esc_html_e('Enter your portal license API URL and module API key below, then save your license key.', 'toplist'); ?>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -197,14 +222,37 @@ class Toplist_Block_License_Admin {
 					<span><?php echo esc_html(ucfirst(Toplist_Block_Util::array_string($cache, 'billing_period'))); ?></span>
 				<?php endif; ?>
 			</p>
-			<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+			<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-bottom:12px;">
 				<?php wp_nonce_field('toplist_license_save'); ?>
 				<input type="hidden" name="action" value="toplist_license_save">
-				<input type="text" name="toplist_license_key" value="" class="regular-text" placeholder="<?php esc_attr_e('xxxx-xxxx-xxxx-xxxx', 'toplist'); ?>" autocomplete="off" style="min-width:260px;">
-				<button type="submit" class="button button-primary"><?php esc_html_e('Save & verify', 'toplist'); ?></button>
-				<?php if (Toplist_Block_License::get_key() !== '') : ?>
-					<button type="submit" name="toplist_license_remove" value="1" class="button"><?php esc_html_e('Remove key', 'toplist'); ?></button>
-				<?php endif; ?>
+				<table class="form-table" role="presentation" style="margin:0;">
+					<tr>
+						<th scope="row"><label for="toplist_license_api_url"><?php esc_html_e('License API URL', 'toplist'); ?></label></th>
+						<td>
+							<input type="url" name="toplist_license_api_url" id="toplist_license_api_url" value="<?php echo esc_attr($api_locked ? $api_url : ($stored_api_url !== '' ? $stored_api_url : $api_url)); ?>" class="large-text code" placeholder="https://portal.example.com/api/v1/toplist-block/validate" <?php disabled($api_locked); ?>>
+							<p class="description"><?php esc_html_e('Portal validate endpoint, e.g. /api/v1/toplist-block/validate', 'toplist'); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="toplist_license_api_key"><?php esc_html_e('Module API key', 'toplist'); ?></label></th>
+						<td>
+							<input type="password" name="toplist_license_api_key" id="toplist_license_api_key" value="" class="regular-text" autocomplete="off" placeholder="<?php echo $has_api_key ? esc_attr__('•••••••• (saved)', 'toplist') : esc_attr__('tbl_…', 'toplist'); ?>" <?php disabled($api_locked); ?>>
+							<p class="description"><?php esc_html_e('From portal config (toplist_block_api_key). Leave blank to keep the saved key.', 'toplist'); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="toplist_license_key"><?php esc_html_e('License key', 'toplist'); ?></label></th>
+						<td>
+							<input type="text" name="toplist_license_key" id="toplist_license_key" value="" class="regular-text" placeholder="<?php esc_attr_e('xxxx-xxxx-xxxx-xxxx', 'toplist'); ?>" autocomplete="off" style="min-width:260px;">
+						</td>
+					</tr>
+				</table>
+				<p style="margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+					<button type="submit" class="button button-primary"><?php esc_html_e('Save & verify', 'toplist'); ?></button>
+					<?php if (Toplist_Block_License::get_key() !== '') : ?>
+						<button type="submit" name="toplist_license_remove" value="1" class="button"><?php esc_html_e('Remove key', 'toplist'); ?></button>
+					<?php endif; ?>
+				</p>
 			</form>
 			<?php if (Toplist_Block_License::get_key() !== '') : ?>
 				<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">

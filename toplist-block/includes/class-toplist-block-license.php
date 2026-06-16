@@ -17,6 +17,8 @@ if (!defined('ABSPATH')) {
 class Toplist_Block_License {
 
 	const OPTION_KEY   = 'toplist_block_license_key';
+	const OPTION_API_URL = 'toplist_block_license_api_url';
+	const OPTION_API_KEY = 'toplist_block_license_api_key';
 	const CACHE_OPTION = 'toplist_block_license_cache_signed';
 	const CRON_HOOK    = 'toplist_block_license_recheck';
 	const PRODUCT_SLUG = 'toplist-block-pro';
@@ -35,6 +37,10 @@ class Toplist_Block_License {
 		if ($from_const !== '') {
 			return $from_const;
 		}
+		$stored = self::get_stored_api_url();
+		if ($stored !== '') {
+			return $stored;
+		}
 		$filtered = apply_filters('toplist_block_license_api_url', '');
 		return is_string($filtered) ? $filtered : '';
 	}
@@ -49,8 +55,59 @@ class Toplist_Block_License {
 		if ($from_const !== '') {
 			return $from_const;
 		}
+		$stored = self::get_stored_api_key();
+		if ($stored !== '') {
+			return $stored;
+		}
 		$filtered = apply_filters('toplist_block_license_api_key', '');
 		return is_string($filtered) ? $filtered : '';
+	}
+
+	/**
+	 * Portal validate endpoint saved in plugin settings (not wp-config).
+	 *
+	 * @return string
+	 */
+	public static function get_stored_api_url(): string {
+		$stored = get_option(self::OPTION_API_URL, '');
+		return is_string($stored) ? $stored : '';
+	}
+
+	/**
+	 * Module API key saved in plugin settings (not wp-config).
+	 *
+	 * @return string
+	 */
+	public static function get_stored_api_key(): string {
+		$stored = get_option(self::OPTION_API_KEY, '');
+		return self::decrypt_secret(is_string($stored) ? $stored : '');
+	}
+
+	/**
+	 * Whether API URL/key come from wp-config constants (read-only in admin).
+	 *
+	 * @return bool
+	 */
+	public static function api_config_locked_by_constant(): bool {
+		return Toplist_Block_Util::configured_constant('TOPLIST_BLOCK_LICENSE_API_URL') !== ''
+			|| Toplist_Block_Util::configured_constant('TOPLIST_BLOCK_LICENSE_API_KEY') !== '';
+	}
+
+	/**
+	 * @param string $url     Validate endpoint URL.
+	 * @param string $api_key Module API key; empty keeps existing stored key.
+	 * @return void
+	 */
+	public static function save_api_settings(string $url, string $api_key): void {
+		if (self::api_config_locked_by_constant()) {
+			return;
+		}
+		$url = esc_url_raw(trim($url));
+		update_option(self::OPTION_API_URL, $url, false);
+		if ($api_key !== '') {
+			update_option(self::OPTION_API_KEY, self::encrypt_secret(sanitize_text_field(trim($api_key))), false);
+		}
+		delete_site_transient('toplist_block_update_info');
 	}
 
 	/**

@@ -21,8 +21,7 @@ bash scripts/setup-local-license.sh
 This will:
 
 1. Start the portal API on `http://127.0.0.1:9080` (PHP built-in server + router)
-2. Install `wp-content/mu-plugins/toplist-local-license.php` with `TOPLIST_BLOCK_LICENSE_*` constants
-3. Issue (or reuse) a lifetime dev license for your WordPress site domain
+2. Issue (or reuse) a lifetime dev license for your WordPress site domain
 
 Then sync the plugin and activate:
 
@@ -31,7 +30,15 @@ cd ..
 bash install-local.sh --plugin-only
 ```
 
-In wp-admin: **Settings → Toplist Block** → paste the printed license key → **Save & verify**.
+In wp-admin: **Settings → Toplist Block**:
+
+1. **License API URL** — `http://127.0.0.1:9080/api/v1/toplist-block/validate`
+2. **Module API key** — from portal `toplist_block_api_key` in `api/config.local.php`
+3. **License key** — from the setup script output (or portal account)
+
+Click **Save & verify**.
+
+Optional: `scripts/setup-local-license.sh` can still install a mu-plugin with constants; the settings UI is the normal path and does not require wp-config or mu-plugins.
 
 ## Portal API options
 

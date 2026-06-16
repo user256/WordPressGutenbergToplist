@@ -29,12 +29,17 @@ Creates plans with `plan_features.value = toplist_block_pro`:
 
 Map Stripe price IDs in admin before live checkout.
 
-## 3. WordPress premium plugin (`wp-config.php`)
+## 3. WordPress premium plugin (Settings → Toplist Block)
 
-```php
-define('TOPLIST_BLOCK_LICENSE_API_URL', 'https://YOUR-PORTAL-HOST/api/v1/toplist-block/validate');
-define('TOPLIST_BLOCK_LICENSE_API_KEY', 'your-toplist_block_api_key-from-config.local.php');
-```
+Enter on the **Toplist Block** settings page (premium plugin):
+
+| Field | Example |
+|-------|---------|
+| **License API URL** | `https://YOUR-PORTAL-HOST/api/v1/toplist-block/validate` |
+| **Module API key** | Value of `toplist_block_api_key` from `api/config.local.php` |
+| **License key** | From portal account after purchase |
+
+Optional: `wp-config.php` constants `TOPLIST_BLOCK_LICENSE_API_URL` and `TOPLIST_BLOCK_LICENSE_API_KEY` override the settings UI (for hosts that lock config in code).
 
 ## 4. Customer flow
 

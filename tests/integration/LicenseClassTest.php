@@ -10,14 +10,11 @@ final class LicenseClassTest extends Toplist_Block_IntegrationTestCase {
 	}
 
 	public function test_license_api_url_constant_can_be_defined(): void {
-		$url = self::wp_eval(
-			<<<'PHP'
-if (!defined('TOPLIST_BLOCK_LICENSE_API_URL')) {
-    define('TOPLIST_BLOCK_LICENSE_API_URL', 'http://127.0.0.1:9080/api/v1/toplist-block/validate');
-}
-echo Toplist_Block_License::api_url();
-PHP
+		update_option(
+			Toplist_Block_License::OPTION_API_URL,
+			'http://127.0.0.1:9080/api/v1/toplist-block/validate'
 		);
+		$url = self::wp_eval('echo Toplist_Block_License::api_url();');
 		$this->assertStringContainsString('/toplist-block/validate', $url);
 	}
 

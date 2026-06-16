@@ -87,19 +87,39 @@ if (!function_exists('apply_filters')) {
 
 if (!function_exists('get_option')) {
 	function get_option(string $key, $default = false) {
-		return $default;
+		global $toplist_test_options;
+		if (!is_array($toplist_test_options)) {
+			$toplist_test_options = array();
+		}
+		return array_key_exists($key, $toplist_test_options) ? $toplist_test_options[$key] : $default;
 	}
 }
 
 if (!function_exists('update_option')) {
-	function update_option(string $key, $value): bool {
+	function update_option(string $key, $value, $autoload = null): bool {
+		global $toplist_test_options;
+		if (!is_array($toplist_test_options)) {
+			$toplist_test_options = array();
+		}
+		$toplist_test_options[$key] = $value;
 		return true;
 	}
 }
 
 if (!function_exists('delete_option')) {
 	function delete_option(string $key): bool {
+		global $toplist_test_options;
+		if (is_array($toplist_test_options)) {
+			unset($toplist_test_options[$key]);
+		}
 		return true;
+	}
+}
+
+if (!function_exists('esc_url_raw')) {
+	function esc_url_raw(string $url): string {
+		$url = trim($url);
+		return preg_match('#^https?://#i', $url) ? $url : '';
 	}
 }
 
