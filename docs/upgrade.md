@@ -49,3 +49,9 @@ Premium licenses can cover more than one hostname. The portal validate response 
 Add satellite domains in the portal account (**Toplist Pro → Licenses**) before using the same key on staging or alternate hosts.
 
 See also: [`docs/portal-setup.md`](portal-setup.md), [`docs/free-vs-premium.md`](free-vs-premium.md).
+
+## Translations (i18n)
+
+- **Premium** (`toplist-block/`) uses text domain `toplist`.
+- **Lite** (`toplist-block-lite/`) uses `toplist-block-lite`, rewritten automatically by `scripts/build-lite.php`.
+- The lite package ships `languages/toplist-block-lite.pot` for translate.wordpress.org submissions.

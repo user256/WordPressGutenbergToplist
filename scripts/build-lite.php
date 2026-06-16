@@ -53,6 +53,11 @@ const TOPLIST_PREMIUM_DELETE_FILES = array(
 	'includes/class-toplist-block-license-admin.php',
 	'includes/class-toplist-block-updater.php',
 	'assets/admin-spreadsheet.js',
+	'assets/admin-editor-ux.js',
+);
+
+const TOPLIST_PREMIUM_DELETE_DIRS = array(
+	'includes/pro',
 );
 
 $root = getcwd();
@@ -113,6 +118,22 @@ function toplist_copy_tree(string $src, string $dst): void
 			copy($from, $to);
 		}
 	}
+}
+
+function toplist_rewrite_lite_text_domain(string $content): string
+{
+	$domain = TOPLIST_LITE_TEXT_DOMAIN;
+	$content = (string) preg_replace(
+		"/load_plugin_textdomain\\(\\s*'toplist'/",
+		"load_plugin_textdomain('" . $domain . "'",
+		$content
+	);
+	$content = (string) preg_replace(
+		"/(,\\s*)'toplist'(\\s*\\))/",
+		"$1'" . $domain . "'$2",
+		$content
+	);
+	return $content;
 }
 
 function toplist_strip_premium_markers(string $content): string
@@ -234,7 +255,12 @@ function toplist_assert_lite_clean(string $lite_dir): void
 		'pre_set_site_transient_update_plugins',
 		'renderLibraryTab',
 		'apiFetch({',
-		'if (false)',
+		'toplist_register_sync_rest_route',
+		'toplist_register_api_sync_hooks',
+		'includes/pro',
+		'toplist_get_effective_bool_option',
+		'toplist_filter_render_list_context_id',
+		", 'toplist')",
 	);
 
 	foreach (toplist_files_with_exts($lite_dir, array('php', 'js')) as $file) {
@@ -315,6 +341,14 @@ foreach (TOPLIST_PREMIUM_DELETE_FILES as $rel) {
 	}
 }
 
+foreach (TOPLIST_PREMIUM_DELETE_DIRS as $rel) {
+	$path = "$dst/$rel";
+	if (is_dir($path)) {
+		echo "  DELETE DIR $rel\n";
+		toplist_rm_rf($path);
+	}
+}
+
 // ---------------------------------------------------------------------------
 // 3. Rename lite main plugin file
 // ---------------------------------------------------------------------------
@@ -328,6 +362,17 @@ foreach (toplist_files_with_exts($dst, array('php', 'js')) as $file) {
 	$stripped = toplist_strip_premium_markers($original);
 	if ($stripped !== $original) {
 		file_put_contents($file, $stripped);
+	}
+}
+
+// ---------------------------------------------------------------------------
+// 4b. Lite text domain rewrite (ticket 607)
+// ---------------------------------------------------------------------------
+foreach (toplist_files_with_exts($dst, array('php', 'js')) as $file) {
+	$original = (string) file_get_contents($file);
+	$rewritten = toplist_rewrite_lite_text_domain($original);
+	if ($rewritten !== $original) {
+		file_put_contents($file, $rewritten);
 	}
 }
 
@@ -431,7 +476,10 @@ if (is_readable($pot_src)) {
 	if (!is_dir($pot_dst_dir)) {
 		mkdir($pot_dst_dir, 0755, true);
 	}
-	copy($pot_src, "$pot_dst_dir/toplist.pot");
+	copy($pot_src, "$pot_dst_dir/toplist-block-lite.pot");
+	$pot = (string) file_get_contents("$pot_dst_dir/toplist-block-lite.pot");
+	$pot = str_replace('Project-Id-Version: Toplist Block', 'Project-Id-Version: Toplist Block Lite', $pot);
+	file_put_contents("$pot_dst_dir/toplist-block-lite.pot", $pot);
 }
 
 // ---------------------------------------------------------------------------
