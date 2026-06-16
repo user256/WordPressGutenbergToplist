@@ -32,16 +32,7 @@ function toplist_load_textdomain(): void
 }
 
 // @toplist-premium-start
-require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-util.php';
-require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-license.php';
-require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-license-admin.php';
-require_once TOPLIST_BLOCK_PATH . '/includes/class-toplist-block-updater.php';
-Toplist_Block_License_Admin::init();
-Toplist_Block_Updater::init();
-add_action(Toplist_Block_License::CRON_HOOK, array('Toplist_Block_License', 'do_recheck'));
-register_activation_hook(TOPLIST_BLOCK_PATH . '/toplist-block.php', 'toplist_block_on_activate');
-add_action('admin_init', 'toplist_block_conflict_guard');
-add_action('admin_notices', 'toplist_block_upgraded_from_lite_notice');
+require_once TOPLIST_BLOCK_PATH . '/includes/pro/bootstrap.php';
 // @toplist-premium-end
 
 /**
@@ -2126,6 +2117,14 @@ function toplist_boot_premium_features()
 	add_action('admin_notices', 'toplist_import_admin_notice');
 	add_action('admin_enqueue_scripts', 'toplist_enqueue_toplist_admin_assets');
 	add_action('admin_footer', 'toplist_print_import_forms_in_footer', 5);
+
+	if (function_exists('toplist_register_editor_ux_hooks')) {
+		toplist_register_editor_ux_hooks();
+	}
+	if (function_exists('toplist_register_api_sync_hooks')) {
+		toplist_register_api_sync_hooks();
+	}
+	add_action('save_post_toplist_list', 'toplist_save_remote_source_meta');
 }
 // @toplist-premium-end
 
@@ -2194,6 +2193,8 @@ function toplist_render($attributes)
 	}
 	// @toplist-premium-end
 
+	$list_context_id = (int) apply_filters('toplist_render_list_context_id', 0, $attributes, $saved_toplist_id, $saved_toplist_mode);
+
 	if (trim($lines) !== '') {
 		$parsed = toplist_parse_lines_to_items($lines, array(
 			'defaultCtaText' => $default_cta_text,
@@ -2218,26 +2219,29 @@ function toplist_render($attributes)
 		return '';
 	}
 
-	$show_year = (isset($attributes['showYear']) ? (bool) $attributes['showYear'] : true) && toplist_get_global_bool_option('toplist_global_show_year', true);
-	$show_logo = (isset($attributes['showLogo']) ? (bool) $attributes['showLogo'] : true) && toplist_get_global_bool_option('toplist_global_show_logo', true);
-	$show_terms = (isset($attributes['showTerms']) ? (bool) $attributes['showTerms'] : true) && toplist_get_global_bool_option('toplist_global_show_terms', true);
-	$show_bullets = (isset($attributes['showBullets']) ? (bool) $attributes['showBullets'] : true) && toplist_get_global_bool_option('toplist_global_show_bullets', true);
-	$show_offer = (isset($attributes['showOffer']) ? (bool) $attributes['showOffer'] : true) && toplist_get_global_bool_option('toplist_global_show_offer', true);
-	$show_payout = (isset($attributes['showPayout']) ? (bool) $attributes['showPayout'] : true) && toplist_get_global_bool_option('toplist_global_show_payout', true);
-	$show_code = (isset($attributes['showCode']) ? (bool) $attributes['showCode'] : true) && toplist_get_global_bool_option('toplist_global_show_code', true);
-	$show_rating = (isset($attributes['showRating']) ? (bool) $attributes['showRating'] : true) && toplist_get_global_bool_option('toplist_global_show_rating', true);
-	$show_regulator = (isset($attributes['showRegulator']) ? (bool) $attributes['showRegulator'] : true) && toplist_get_global_bool_option('toplist_global_show_regulator', true);
-	$show_payments = (isset($attributes['showPayments']) ? (bool) $attributes['showPayments'] : true) && toplist_get_global_bool_option('toplist_global_show_payments', true);
-	$show_games = (isset($attributes['showGames']) ? (bool) $attributes['showGames'] : true) && toplist_get_global_bool_option('toplist_global_show_games', true);
-	$show_live_games = (isset($attributes['showLiveGames']) ? (bool) $attributes['showLiveGames'] : true) && toplist_get_global_bool_option('toplist_global_show_live_games', true);
-	$show_small_print = (isset($attributes['showSmallPrint']) ? (bool) $attributes['showSmallPrint'] : true) && toplist_get_global_bool_option('toplist_global_show_small_print', true);
-	$show_read_review = (isset($attributes['showReadReview']) ? (bool) $attributes['showReadReview'] : true) && toplist_get_global_bool_option('toplist_global_show_read_review', true);
-	$show_withdrawals = (isset($attributes['showWithdrawals']) ? (bool) $attributes['showWithdrawals'] : true) && toplist_get_global_bool_option('toplist_global_show_withdrawals', true);
+	$show_year = (isset($attributes['showYear']) ? (bool) $attributes['showYear'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_year', true), $list_context_id, 'toplist_global_show_year', true);
+	$show_logo = (isset($attributes['showLogo']) ? (bool) $attributes['showLogo'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_logo', true), $list_context_id, 'toplist_global_show_logo', true);
+	$show_terms = (isset($attributes['showTerms']) ? (bool) $attributes['showTerms'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_terms', true), $list_context_id, 'toplist_global_show_terms', true);
+	$show_bullets = (isset($attributes['showBullets']) ? (bool) $attributes['showBullets'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_bullets', true), $list_context_id, 'toplist_global_show_bullets', true);
+	$show_offer = (isset($attributes['showOffer']) ? (bool) $attributes['showOffer'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_offer', true), $list_context_id, 'toplist_global_show_offer', true);
+	$show_payout = (isset($attributes['showPayout']) ? (bool) $attributes['showPayout'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_payout', true), $list_context_id, 'toplist_global_show_payout', true);
+	$show_code = (isset($attributes['showCode']) ? (bool) $attributes['showCode'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_code', true), $list_context_id, 'toplist_global_show_code', true);
+	$show_rating = (isset($attributes['showRating']) ? (bool) $attributes['showRating'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_rating', true), $list_context_id, 'toplist_global_show_rating', true);
+	$show_regulator = (isset($attributes['showRegulator']) ? (bool) $attributes['showRegulator'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_regulator', true), $list_context_id, 'toplist_global_show_regulator', true);
+	$show_payments = (isset($attributes['showPayments']) ? (bool) $attributes['showPayments'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_payments', true), $list_context_id, 'toplist_global_show_payments', true);
+	$show_games = (isset($attributes['showGames']) ? (bool) $attributes['showGames'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_games', true), $list_context_id, 'toplist_global_show_games', true);
+	$show_live_games = (isset($attributes['showLiveGames']) ? (bool) $attributes['showLiveGames'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_live_games', true), $list_context_id, 'toplist_global_show_live_games', true);
+	$show_small_print = (isset($attributes['showSmallPrint']) ? (bool) $attributes['showSmallPrint'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_small_print', true), $list_context_id, 'toplist_global_show_small_print', true);
+	$show_read_review = (isset($attributes['showReadReview']) ? (bool) $attributes['showReadReview'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_read_review', true), $list_context_id, 'toplist_global_show_read_review', true);
+	$show_withdrawals = (isset($attributes['showWithdrawals']) ? (bool) $attributes['showWithdrawals'] : true) && (bool) apply_filters('toplist_get_render_bool', toplist_get_global_bool_option('toplist_global_show_withdrawals', true), $list_context_id, 'toplist_global_show_withdrawals', true);
 
 	ob_start();
 
-	$global_css = get_option('toplist_global_css', '');
-	$global_css = trim(wp_strip_all_tags($global_css));
+	$global_css = (string) apply_filters('toplist_get_render_css', '', $list_context_id);
+	if ($global_css === '') {
+		$raw_css = get_option('toplist_global_css', '');
+		$global_css = is_string($raw_css) ? trim(wp_strip_all_tags($raw_css)) : '';
+	}
 	if ($global_css !== '') {
 		echo '<style>' . $global_css . '</style>';
 	}
