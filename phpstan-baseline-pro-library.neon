@@ -1,0 +1,46 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
+			count: 1
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
+			count: 5
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Function toplist_toplists_admin_columns\\(\\) has parameter \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Function toplist_toplists_admin_columns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Offset 'name' on array\\{name\\: string, post_id\\: int, rows\\: non\\-empty\\-array\\<int\\<0, max\\>, non\\-falsy\\-string\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Offset 'post_id' on array\\{name\\: string, post_id\\: int, rows\\: non\\-empty\\-array\\<int\\<0, max\\>, non\\-falsy\\-string\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
+			count: 3
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fputcsv expects resource, resource\\|false given\\.$#"
+			count: 6
+			path: toplist-block/includes/pro/library.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_html expects string, int\\|string\\|false given\\.$#"
+			count: 1
+			path: toplist-block/includes/pro/library.php

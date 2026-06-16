@@ -166,6 +166,12 @@ function toplist_settings_page()
             update_option($option_name, !empty($_POST[$option_name]) ? '1' : '0');
         }
 
+        update_option('toplist_click_tracking_enabled', !empty($_POST['toplist_click_tracking_enabled']) ? '1' : '0');
+        update_option('toplist_click_obfuscate_links', !empty($_POST['toplist_click_obfuscate_links']) ? '1' : '0');
+        if (isset($_POST['toplist_click_disclosure_text'])) {
+            update_option('toplist_click_disclosure_text', sanitize_textarea_field(wp_unslash($_POST['toplist_click_disclosure_text'])));
+        }
+
         echo '<div class="notice notice-success"><p>Settings saved!</p></div>';
     }
 
@@ -193,6 +199,7 @@ function toplist_settings_page()
         if (class_exists('Toplist_Block_License_Admin')) {
             Toplist_Block_License_Admin::render_settings_panel();
         }
+        do_action('toplist_settings_premium_panels');
         // @toplist-premium-end
         ?>
 

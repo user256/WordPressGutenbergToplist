@@ -2,9 +2,9 @@
 
 This roadmap tracks the two-plugin commercialisation programme for Toplist Block: a **premium canonical source** (`toplist-block/`) and a **generated lite build** (`toplist-block-lite/`) for WordPress.org, following the solar-form pattern.
 
-**Programme status:** Sprints 1–5 complete (launch-ready). **Sprint 6** is the active backlog.
+**Programme status:** Sprints 1–6 complete (launch-ready).
 
-See `tickets/completed/overview.md` for archived Sprints 1–5.
+See `tickets/completed/overview.md` for archived Sprints 1–6.
 
 ---
 
@@ -17,7 +17,7 @@ See `tickets/completed/overview.md` for archived Sprints 1–5.
 | **Sprint 3** — Premium licensing | Done |
 | **Sprint 4** — Distribution & compliance | Done |
 | **Sprint 5** — Pro feature expansion | Done |
-| **Sprint 6** — Post-launch expansion | In progress |
+| **Sprint 6** — Post-launch expansion | Done |
 
 ---
 
@@ -28,20 +28,22 @@ See `tickets/completed/overview.md` for archived Sprints 1–5.
 
 ---
 
-# Sprint 6 — Post-Launch Expansion
+# Sprint 6 — Post-Launch Expansion (archived)
 
-- [ ] [601](601-geo-variant-toplists.md) — Geo-variant toplists (premium)
-- [ ] [602](602-outbound-click-tracking.md) — Outbound click tracking (premium)
-- [x] [603](completed/603-wp-integration-tests.md) — WordPress integration tests (wp-env)
-- [x] [604](604-wporg-svn-deploy.md) — WP.org SVN deploy automation (`scripts/deploy-wporg.sh` + `docs/wporg-deploy.md`)
-- [x] [605](605-multisite-satellite-domains.md) — Multisite satellite domains
-- [ ] [606](606-portal-pricing-page.md) — Portal pricing page (Toplist Pro)
-- [x] [607](607-lite-text-domain-cleanup.md) — Lite text domain cleanup
-- [x] [610](610-editor-ux-enhancements.md) — Toplist editor UX enhancements (Live preview & overrides)
-- [x] [611](611-api-population-options.md) — API population options
-- [ ] [612](612-visual-card-builder.md) — Visual drag & drop card builder
-- [ ] [613](613-premium-bootstrap-refactor.md) — Premium bootstrap architecture refactor (partial: `includes/pro/` scaffold)
-- [ ] [699](699-sprint-6-review.md) — Sprint 6 review
+See [Sprint 6 review](../docs/sprint-6-review.md) and `tickets/completed/sprint-6/`.
+
+- [x] 601 — Geo-variant toplists
+- [x] 602 — Outbound click tracking
+- [x] 603 — WordPress integration tests
+- [x] 604 — WP.org SVN deploy
+- [x] 605 — Multisite satellite domains
+- [x] 606 — Portal pricing page
+- [x] 607 — Lite text domain cleanup
+- [x] 610 — Editor UX (live preview & overrides)
+- [x] 611 — API population options
+- [x] 612 — Visual card layout builder
+- [x] 613 — Premium bootstrap refactor
+- [x] 699 — Sprint 6 review
 
 ---
 
@@ -60,7 +62,7 @@ See `tickets/completed/overview.md` for archived Sprints 1–5.
 2. Local license E2E: `bash scripts/setup-local-license.sh` — see `docs/local-dev.md`
 3. Portal: seed plans, configure `toplist_block_*` keys, upload premium zip
 4. WP.org: submit `toplist-block-lite.zip` + assets
-5. Portal: open Stripe checkout for `toplist-block-pro*` plans
+5. Portal: open Stripe checkout on `/toplist-pricing.php` for `toplist-block-pro*` plans
 
 ---
 
@@ -68,5 +70,5 @@ See `tickets/completed/overview.md` for archived Sprints 1–5.
 
 - Build: `php scripts/build-lite.php`
 - Tests: `composer test`, `composer test:build`, `composer test:integration` (wp-env), `composer phpstan`, `composer check`
-- Docs: `docs/free-vs-premium.md`, `docs/upgrade.md`, `docs/portal-setup.md`, `docs/local-dev.md`
+- Docs: `docs/free-vs-premium.md`, `docs/upgrade.md`, `docs/portal-setup.md`, `docs/local-dev.md`, `docs/sprint-6-review.md`
 - Reviews: `docs/sprint-3-review.md`, `docs/sprint-4-review.md`, `docs/sprint-5-review.md`

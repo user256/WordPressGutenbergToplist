@@ -36,4 +36,16 @@
 		var isHidden = details.style.display === 'none';
 		setDetailsState(item, isHidden);
 	});
+
+	window.toplistFollowOutbound = function (el) {
+		var encoded = el.getAttribute('data-toplist-outbound');
+		if (!encoded) {
+			return;
+		}
+		try {
+			window.location.href = atob(encoded);
+		} catch (err) {
+			// ignore decode errors
+		}
+	};
 })();

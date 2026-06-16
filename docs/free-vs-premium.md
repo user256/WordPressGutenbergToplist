@@ -31,6 +31,11 @@ Both register block `toplist/rankings` so post content survives lite → premium
 | OTA plugin updates | — | ✓ |
 | Admin spreadsheet editor (CPT) | — | ✓ |
 | ItemList JSON-LD schema | — | ✓ (license-gated) |
+| Geo-variant rows (`geo` column) | — | ✓ |
+| Outbound click tracking + optional link obfuscation | — | ✓ |
+| REST `POST /toplist-block/v1/sync/{id}` + remote source cron | — | ✓ |
+| Live preview + per-list theme overrides | — | ✓ |
+| Visual card layout builder (flex order) | — | ✓ |
 | Lite upgrade admin notice | ✓ | — |
 
 ## PREMIUM_FILES (deleted from lite tree)
@@ -38,20 +43,24 @@ Both register block `toplist/rankings` so post content survives lite → premium
 ```
 admin-diagnostics.php
 check-plugin.php
+includes/class-toplist-block-util.php
 includes/class-toplist-block-license.php
 includes/class-toplist-block-license-admin.php
 includes/class-toplist-block-updater.php
+includes/pro/          (entire directory)
+assets/admin-spreadsheet.js
+assets/admin-editor-ux.js
 ```
 
 ## Build transforms (marker strips)
 
-Regions wrapped in `// @toplist-premium-start` … `// @toplist-premium-end` (PHP) or `/* @toplist-premium-start */` … `/* @toplist-premium-end */` (JS) are removed from lite copies:
+Premium bootstrap is a single marker in `toplist-block.php` loading `includes/pro/bootstrap.php`. The build **deletes** `includes/pro/` entirely; remaining small marker regions in `toplist-block.php`, `block.js`, and `settings-page.php` are regex-stripped.
 
 | File | Premium regions |
 |------|-----------------|
-| `toplist-block.php` | CPT, REST, import handlers, metaboxes, premium hooks, linked render branch, admin-diagnostics require |
+| `toplist-block.php` | Bootstrap require, block attributes (library/schema/geo), linked render branch, schema output |
 | `block.js` | JSON helpers, library UI, apiFetch usage |
-| `settings-page.php` | Bulk CSV handler, URLs, notices, settings UI row |
+| `settings-page.php` | Bulk CSV handler, URLs, notices, license panel hook |
 
 ## Premium residue tokens (smoke test)
 

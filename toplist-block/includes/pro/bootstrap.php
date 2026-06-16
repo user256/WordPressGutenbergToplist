@@ -32,8 +32,13 @@ final class Toplist_Block_Pro_Bootstrap {
 		add_action('admin_init', 'toplist_block_conflict_guard');
 		add_action('admin_notices', 'toplist_block_upgraded_from_lite_notice');
 
+		require_once __DIR__ . '/library.php';
 		require_once __DIR__ . '/editor-ux.php';
 		require_once __DIR__ . '/api-sync.php';
+		require_once __DIR__ . '/geo.php';
+		require_once __DIR__ . '/click-tracking.php';
+		require_once __DIR__ . '/card-builder.php';
+		require_once TOPLIST_BLOCK_PATH . '/admin-diagnostics.php';
 	}
 }
 

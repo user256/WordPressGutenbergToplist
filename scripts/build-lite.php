@@ -13,7 +13,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 const TOPLIST_LITE_TEXT_DOMAIN = 'toplist-block-lite';
-const TOPLIST_LITE_UPGRADE_URL   = 'https://example.com/account/toplist-block/licenses.php';
+const TOPLIST_LITE_UPGRADE_URL   = 'https://example.com/toplist-pricing.php';
 // Override at build: TOPLIST_LITE_UPGRADE_URL=... php scripts/build-lite.php
 $lite_upgrade_url = getenv('TOPLIST_LITE_UPGRADE_URL');
 if (is_string($lite_upgrade_url) && $lite_upgrade_url !== '') {

@@ -332,4 +332,11 @@ if (!class_exists('WP_Error')) {
 
 require_once TOPLIST_BLOCK_PATH . 'toplist-block.php';
 
+foreach (array('geo.php', 'click-tracking.php') as $pro_file) {
+	$path = TOPLIST_BLOCK_PATH . 'includes/pro/' . $pro_file;
+	if (is_readable($path)) {
+		require_once $path;
+	}
+}
+
 require_once __DIR__ . '/IntegrationTestCase.php';
