@@ -33,10 +33,14 @@ See `tickets/completed/overview.md` for archived Sprints 1–5.
 - [ ] [601](601-geo-variant-toplists.md) — Geo-variant toplists (premium)
 - [ ] [602](602-outbound-click-tracking.md) — Outbound click tracking (premium)
 - [x] [603](completed/603-wp-integration-tests.md) — WordPress integration tests (wp-env)
-- [ ] [604](604-wporg-svn-deploy.md) — WP.org SVN deploy automation (`scripts/deploy-wporg.sh` scaffolded)
-- [ ] [605](605-multisite-satellite-domains.md) — Multisite satellite domains
+- [x] [604](604-wporg-svn-deploy.md) — WP.org SVN deploy automation (`scripts/deploy-wporg.sh` + `docs/wporg-deploy.md`)
+- [x] [605](605-multisite-satellite-domains.md) — Multisite satellite domains
 - [ ] [606](606-portal-pricing-page.md) — Portal pricing page (Toplist Pro)
-- [ ] [607](607-lite-text-domain-cleanup.md) — Lite text domain cleanup
+- [x] [607](607-lite-text-domain-cleanup.md) — Lite text domain cleanup
+- [x] [610](610-editor-ux-enhancements.md) — Toplist editor UX enhancements (Live preview & overrides)
+- [x] [611](611-api-population-options.md) — API population options
+- [ ] [612](612-visual-card-builder.md) — Visual drag & drop card builder
+- [ ] [613](613-premium-bootstrap-refactor.md) — Premium bootstrap architecture refactor (partial: `includes/pro/` scaffold)
 - [ ] [699](699-sprint-6-review.md) — Sprint 6 review
 
 ---
