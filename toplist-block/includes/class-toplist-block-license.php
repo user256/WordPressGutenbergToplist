@@ -420,7 +420,7 @@ class Toplist_Block_License {
 	public static function current_install_domain(): string {
 		$host = wp_parse_url(home_url('/'), PHP_URL_HOST);
 		$host = is_string($host) ? $host : '';
-		return strtolower((string) preg_replace('#^www\.#', '', $host));
+		return Toplist_Block_Util::normalize_domain($host);
 	}
 
 	/**

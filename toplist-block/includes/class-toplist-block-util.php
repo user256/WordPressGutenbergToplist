@@ -54,6 +54,14 @@ final class Toplist_Block_Util {
 	}
 
 	/**
+	 * Normalize a hostname for license domain checks (lowercase, no leading www.).
+	 */
+	public static function normalize_domain(string $host): string {
+		$host = strtolower(trim($host));
+		return (string) preg_replace('#^www\.#', '', $host);
+	}
+
+	/**
 	 * Read plugin update transient response map (WordPress stdClass).
 	 *
 	 * @param object $transient Update transient object.
