@@ -29,7 +29,7 @@ From the WP.org audit ([`docs/wporg-audit-toplist-block-lite-2026-06-16.md`](../
 - [x] [711](711-frontend-css-enqueue.md) — Enqueue front-end CSS instead of inline `<style>`
 - [x] [712](712-settings-page-enqueue.md) — Enqueue settings-page inline `<style>` / `<script>`
 - [x] [713](713-lite-upgrade-notice-enqueue.md) — Move lite upgrade-notice `<script>` to enqueued handle
-- [ ] [714](714-demo-url-cleanup.md) — Replace demo `example.com` / placeholder URLs in sample content
+- [x] [714](714-demo-url-cleanup.md) — Replace demo `example.com` / placeholder URLs in sample content
 - [ ] [799](799-sprint-7-review.md) — Sprint 7 review — rebuild & re-audit
 
 ---

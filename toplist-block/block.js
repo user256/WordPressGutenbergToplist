@@ -751,7 +751,9 @@
 			}
 
 			function addExample() {
-				var example = 'Mr Vegas|Mr Vegas Casino|100% Welcome Bonus up to £200 + 11 Free Spins|https://example.com|https://via.placeholder.com/150x100.png?text=Logo|2020|Visit Casino|Full Terms Apply.|Extensive slots;Weekly cashback;Fast payouts|Instant|LUCKY26|4.9|UK Gambling Commission|Visa;PayPal;Skrill|Slots;Roulette;Blackjack|400+|18+. Wagering applies.|https://example.com/review|Read Review|Instant;Bank transfer';
+				// Use the IANA-reserved example.com domain for demo assets (no live
+				// external image host such as via.placeholder.com) — ticket 714.
+				var example = 'Mr Vegas|Mr Vegas Casino|100% Welcome Bonus up to £200 + 11 Free Spins|https://example.com|https://example.com/logo.png|2020|Visit Casino|Full Terms Apply.|Extensive slots;Weekly cashback;Fast payouts|Instant|LUCKY26|4.9|UK Gambling Commission|Visa;PayPal;Skrill|Slots;Roulette;Blackjack|400+|18+. Wagering applies.|https://example.com/review|Read Review|Instant;Bank transfer';
 				var next = (lines ? (lines + '\n') : '') + example;
 				parseAndSet(next);
 			}
