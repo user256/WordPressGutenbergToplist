@@ -97,8 +97,28 @@ function toplist_rm_rf(string $dir): void
 	rmdir($dir);
 }
 
-function toplist_copy_tree(string $src, string $dst): void
+function toplist_should_exclude_relpath(string $rel): bool
 {
+	$rel = ltrim(str_replace('\\', '/', $rel), '/');
+	foreach (TOPLIST_DIST_EXCLUDE as $exclude) {
+		$exclude = ltrim(str_replace('\\', '/', $exclude), '/');
+		if (substr($exclude, -1) === '/') {
+			$exclude_dir = rtrim($exclude, '/');
+			if ($rel === $exclude_dir || strpos($rel, $exclude) === 0) {
+				return true;
+			}
+			continue;
+		}
+		if ($rel === $exclude) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function toplist_copy_tree(string $src, string $dst, ?string $root_src = null): void
+{
+	$root_src = $root_src ?? $src;
 	if (!is_dir($dst)) {
 		mkdir($dst, 0755, true);
 	}
@@ -112,8 +132,12 @@ function toplist_copy_tree(string $src, string $dst): void
 		}
 		$from = "$src/$item";
 		$to   = "$dst/$item";
+		$rel  = ltrim(str_replace('\\', '/', substr($from, strlen($root_src))), '/');
+		if (toplist_should_exclude_relpath($rel)) {
+			continue;
+		}
 		if (is_dir($from)) {
-			toplist_copy_tree($from, $to);
+			toplist_copy_tree($from, $to, $root_src);
 		} else {
 			copy($from, $to);
 		}
@@ -168,6 +192,9 @@ function toplist_zip_directory(string $source_dir, string $zip_path, string $zip
 		/** @var SplFileInfo $file */
 		$path = $file->getPathname();
 		$rel  = substr($path, strlen($source_dir) + 1);
+		if (toplist_should_exclude_relpath($rel)) {
+			continue;
+		}
 		$arc  = $zip_root_name . '/' . str_replace('\\', '/', $rel);
 		if ($file->isDir()) {
 			$zip->addEmptyDir($arc);
@@ -513,6 +540,9 @@ foreach ($iterator as $file) {
 	/** @var SplFileInfo $file */
 	$path = $file->getPathname();
 	$rel  = substr($path, strlen("$staging/toplist-block") + 1);
+	if (toplist_should_exclude_relpath($rel)) {
+		continue;
+	}
 	$arc  = 'toplist-block/' . str_replace('\\', '/', $rel);
 	if ($file->isDir()) {
 		$zip->addEmptyDir($arc);

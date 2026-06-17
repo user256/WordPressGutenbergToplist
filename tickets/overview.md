@@ -47,15 +47,6 @@ See [Sprint 6 review](../docs/sprint-6-review.md) and `tickets/completed/sprint-
 
 ---
 
-# Sprint 6 — Quality (PHPStan + testing)
-
-- [x] [701](completed/701-phpstan-scaffold.md) — PHPStan level 9 scaffold
-- [x] [702](completed/702-phpstan-includes-clean.md) — PHPStan baseline clearance — premium includes
-- [x] [703](completed/703-phpunit-expansion-policy.md) — PHPUnit expansion + testing-as-you-go policy
-- [x] [704](completed/704-ci-quality-gate.md) — CI quality gate (`composer check`)
-
----
-
 # Launch checklist (operator)
 
 1. `composer check` — green CI (unit tests + PHPStan + lite build smoke)

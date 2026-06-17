@@ -7,7 +7,7 @@
  * @package Toplist_Block
  */
 
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
@@ -17,101 +17,111 @@ if (!defined('ABSPATH')) {
 class Toplist_Block_License_Admin {
 
 	/**
+	 * Register hooks.
+	 *
 	 * @return void
 	 */
 	public static function init(): void {
-		add_action('admin_post_toplist_license_save', array(__CLASS__, 'handle_save'));
-		add_action('admin_post_toplist_license_recheck', array(__CLASS__, 'handle_recheck'));
-		add_action('admin_notices', array(__CLASS__, 'render_global_notice'));
-		add_action('wp_ajax_toplist_license_dismiss_notice', array(__CLASS__, 'dismiss_notice'));
+		add_action( 'admin_post_toplist_license_save', array( __CLASS__, 'handle_save' ) );
+		add_action( 'admin_post_toplist_license_recheck', array( __CLASS__, 'handle_recheck' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'render_global_notice' ) );
+		add_action( 'wp_ajax_toplist_license_dismiss_notice', array( __CLASS__, 'dismiss_notice' ) );
 	}
 
 	/**
+	 * Return settings URL.
+	 *
 	 * @return string
 	 */
 	public static function settings_url(): string {
-		return admin_url('options-general.php?page=toplist-settings');
+		return admin_url( 'options-general.php?page=toplist-settings' );
 	}
 
 	/**
+	 * Handle save license form.
+	 *
 	 * @return void
 	 */
 	public static function handle_save(): void {
-		if (!current_user_can('manage_options')) {
-			wp_die(esc_html__('You do not have permission to do that.', 'toplist'));
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'toplist' ) );
 		}
-		check_admin_referer('toplist_license_save');
+		check_admin_referer( 'toplist_license_save' );
 
-		if (!Toplist_Block_License::api_config_locked_by_constant()) {
-			$api_url = isset($_POST['toplist_license_api_url'])
-				? esc_url_raw(trim((string) wp_unslash($_POST['toplist_license_api_url'])))
+		if ( ! Toplist_Block_License::api_config_locked_by_constant() ) {
+			$api_url = isset( $_POST['toplist_license_api_url'] )
+				? esc_url_raw( trim( sanitize_text_field( wp_unslash( $_POST['toplist_license_api_url'] ) ) ) )
 				: '';
-			$api_key = isset($_POST['toplist_license_api_key'])
-				? sanitize_text_field((string) wp_unslash($_POST['toplist_license_api_key']))
+			$api_key = isset( $_POST['toplist_license_api_key'] )
+				? sanitize_text_field( (string) wp_unslash( $_POST['toplist_license_api_key'] ) )
 				: '';
-			Toplist_Block_License::save_api_settings($api_url, $api_key);
+			Toplist_Block_License::save_api_settings( $api_url, $api_key );
 		}
 
-		if (!empty($_POST['toplist_license_remove'])) {
+		if ( ! empty( $_POST['toplist_license_remove'] ) ) {
 			Toplist_Block_License::clear();
-			wp_safe_redirect(add_query_arg('toplist_license_status', 'cleared', self::settings_url()));
+			wp_safe_redirect( add_query_arg( 'toplist_license_status', 'cleared', self::settings_url() ) );
 			exit;
 		}
 
-		$key = isset($_POST['toplist_license_key']) ? sanitize_text_field((string) wp_unslash($_POST['toplist_license_key'])) : '';
+		$key = isset( $_POST['toplist_license_key'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['toplist_license_key'] ) ) : '';
 
-		if ($key === '') {
-			if (!empty($_POST['toplist_license_remove'])) {
+		if ( '' === $key ) {
+			if ( ! empty( $_POST['toplist_license_remove'] ) ) {
 				Toplist_Block_License::clear();
-				wp_safe_redirect(add_query_arg('toplist_license_status', 'cleared', self::settings_url()));
+				wp_safe_redirect( add_query_arg( 'toplist_license_status', 'cleared', self::settings_url() ) );
 				exit;
 			}
 			$existing = Toplist_Block_License::get_key();
-			if ($existing !== '') {
+			if ( '' !== $existing ) {
 				$result = Toplist_Block_License::validate();
 				Toplist_Block_License::schedule_from_cache();
-				self::redirect_with_result($result);
+				self::redirect_with_result( $result );
 			}
-			wp_safe_redirect(add_query_arg('toplist_license_status', 'api_saved', self::settings_url()));
+			wp_safe_redirect( add_query_arg( 'toplist_license_status', 'api_saved', self::settings_url() ) );
 			exit;
 		}
 
-		$result = Toplist_Block_License::activate($key);
-		self::redirect_with_result($result);
+		$result = Toplist_Block_License::activate( $key );
+		self::redirect_with_result( $result );
 	}
 
 	/**
+	 * Handle recheck license.
+	 *
 	 * @return void
 	 */
 	public static function handle_recheck(): void {
-		if (!current_user_can('manage_options')) {
-			wp_die(esc_html__('You do not have permission to do that.', 'toplist'));
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'toplist' ) );
 		}
-		check_admin_referer('toplist_license_recheck');
+		check_admin_referer( 'toplist_license_recheck' );
 
 		$result = Toplist_Block_License::validate();
 		Toplist_Block_License::schedule_from_cache();
-		self::redirect_with_result($result);
+		self::redirect_with_result( $result );
 	}
 
 	/**
+	 * Redirect with license result.
+	 *
 	 * @param array<string, mixed> $result Validation result.
 	 * @return void
 	 */
-	private static function redirect_with_result(array $result): void {
-		$status = Toplist_Block_Util::array_string($result, 'status');
-		if ($status === '') {
+	private static function redirect_with_result( array $result ): void {
+		$status = Toplist_Block_Util::array_string( $result, 'status' );
+		if ( '' === $status ) {
 			$status = 'invalid';
 		}
-		if (in_array($status, array('active', 'grace'), true)) {
+		if ( in_array( $status, array( 'active', 'grace' ), true ) ) {
 			$status = 'active';
 		}
-		$args = array('toplist_license_status' => $status);
-		$message = Toplist_Block_Util::array_string($result, 'message');
-		if ($status !== 'active' && $message !== '') {
-			$args['toplist_license_msg'] = rawurlencode($message);
+		$args    = array( 'toplist_license_status' => $status );
+		$message = Toplist_Block_Util::array_string( $result, 'message' );
+		if ( 'active' !== $status && '' !== $message ) {
+			$args['toplist_license_msg'] = rawurlencode( $message );
 		}
-		wp_safe_redirect(add_query_arg($args, self::settings_url()));
+		wp_safe_redirect( add_query_arg( $args, self::settings_url() ) );
 		exit;
 	}
 
@@ -121,36 +131,38 @@ class Toplist_Block_License_Admin {
 	 * @return void
 	 */
 	public static function render_global_notice(): void {
-		if (!current_user_can('manage_options')) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		if (Toplist_Block_License::is_valid()) {
+		if ( Toplist_Block_License::is_valid() ) {
 			return;
 		}
-		$screen = function_exists('get_current_screen') ? get_current_screen() : null;
-		if ($screen && $screen->id === 'settings_page_toplist-settings') {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen && 'settings_page_toplist-settings' === $screen->id ) {
 			return;
 		}
-		if (get_user_meta(get_current_user_id(), 'toplist_license_notice_dismissed', true)) {
+		if ( get_user_meta( get_current_user_id(), 'toplist_license_notice_dismissed', true ) ) {
 			return;
 		}
 		$url = self::settings_url();
 		echo '<div class="notice notice-warning is-dismissible" data-toplist-license-notice="1"><p>';
-		echo esc_html__('Toplist Block Pro features are inactive until you enter a valid license key.', 'toplist');
-		echo ' <a href="' . esc_url($url) . '">' . esc_html__('Enter license', 'toplist') . '</a>';
+		echo esc_html__( 'Toplist Block Pro features are inactive until you enter a valid license key.', 'toplist' );
+		echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Enter license', 'toplist' ) . '</a>';
 		echo '</p></div>';
-		echo '<script>(function(){var n=document.querySelector("[data-toplist-license-notice]");if(!n||!window.jQuery)return;jQuery(n).on("click",".notice-dismiss",function(){jQuery.post(ajaxurl,{action:"toplist_license_dismiss_notice",_ajax_nonce:"' . esc_js(wp_create_nonce('toplist_license_dismiss')) . '"});});})();</script>';
+		echo '<script>(function(){var n=document.querySelector("[data-toplist-license-notice]");if(!n||!window.jQuery)return;jQuery(n).on("click",".notice-dismiss",function(){jQuery.post(ajaxurl,{action:"toplist_license_dismiss_notice",_ajax_nonce:"' . esc_js( wp_create_nonce( 'toplist_license_dismiss' ) ) . '"});});})();</script>';
 	}
 
 	/**
+	 * AJAX dismiss notice.
+	 *
 	 * @return void
 	 */
 	public static function dismiss_notice(): void {
-		check_ajax_referer('toplist_license_dismiss');
-		if (!current_user_can('manage_options')) {
-			wp_send_json_error(null, 403);
+		check_ajax_referer( 'toplist_license_dismiss' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( null, 403 );
 		}
-		update_user_meta(get_current_user_id(), 'toplist_license_notice_dismissed', '1');
+		update_user_meta( get_current_user_id(), 'toplist_license_notice_dismissed', '1' );
 		wp_send_json_success();
 	}
 
@@ -160,120 +172,131 @@ class Toplist_Block_License_Admin {
 	 * @return void
 	 */
 	public static function render_settings_panel(): void {
-		if (!class_exists('Toplist_Block_License')) {
+		if ( ! class_exists( 'Toplist_Block_License' ) ) {
 			return;
 		}
 
-		if (isset($_GET['toplist_license_status'])) {
-			$lstat = sanitize_key((string) wp_unslash($_GET['toplist_license_status']));
-			$lmsg = isset($_GET['toplist_license_msg'])
-				? sanitize_text_field((string) urldecode(wp_unslash($_GET['toplist_license_msg'])))
+		if ( isset( $_GET['toplist_license_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$lstat = sanitize_key( (string) wp_unslash( $_GET['toplist_license_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$lmsg  = isset( $_GET['toplist_license_msg'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				? sanitize_text_field( urldecode( wp_unslash( $_GET['toplist_license_msg'] ) ) ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Recommended
 				: '';
-			if ($lstat === 'active') {
-				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('License verified. Pro features are active.', 'toplist') . '</p></div>';
-			} elseif ($lstat === 'api_saved') {
-				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Portal connection settings saved.', 'toplist') . '</p></div>';
-			} elseif ($lstat === 'cleared') {
-				echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__('License key removed.', 'toplist') . '</p></div>';
-			} elseif (in_array($lstat, array('invalid', 'expired', 'unreachable'), true)) {
-				$class = $lstat === 'unreachable' ? 'notice-warning' : 'notice-error';
-				$text = $lmsg !== '' ? $lmsg : __('License could not be verified for this site.', 'toplist');
-				echo '<div class="notice ' . esc_attr($class) . ' is-dismissible"><p>' . esc_html($text) . '</p></div>';
+			if ( 'active' === $lstat ) {
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'License verified. Pro features are active.', 'toplist' ) . '</p></div>';
+			} elseif ( 'api_saved' === $lstat ) {
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Portal connection settings saved.', 'toplist' ) . '</p></div>';
+			} elseif ( 'cleared' === $lstat ) {
+				echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'License key removed.', 'toplist' ) . '</p></div>';
+			} elseif ( in_array( $lstat, array( 'invalid', 'expired', 'unreachable' ), true ) ) {
+				$class = 'unreachable' === $lstat ? 'notice-warning' : 'notice-error';
+				$text  = '' !== $lmsg ? $lmsg : __( 'License could not be verified for this site.', 'toplist' );
+				echo '<div class="notice ' . esc_attr( $class ) . ' is-dismissible"><p>' . esc_html( $text ) . '</p></div>';
 			}
 		}
 
-		$cache = Toplist_Block_License::get_cache();
-		$status = Toplist_Block_Util::array_string($cache, 'status');
-		$valid = Toplist_Block_License::is_valid();
-		$next = wp_next_scheduled(Toplist_Block_License::CRON_HOOK);
-		$api_url = Toplist_Block_License::api_url();
+		$cache          = Toplist_Block_License::get_cache();
+		$status         = Toplist_Block_Util::array_string( $cache, 'status' );
+		$valid          = Toplist_Block_License::is_valid();
+		$next           = wp_next_scheduled( Toplist_Block_License::CRON_HOOK );
+		$api_url        = Toplist_Block_License::api_url();
 		$stored_api_url = Toplist_Block_License::get_stored_api_url();
-		$api_locked = Toplist_Block_License::api_config_locked_by_constant();
-		$has_api_key = Toplist_Block_License::api_key() !== '';
+		$api_locked     = Toplist_Block_License::api_config_locked_by_constant();
+		$has_api_key    = Toplist_Block_License::api_key() !== '';
 		?>
 		<div class="toplist-license-panel" style="background:#f6f7f7;border:1px solid #c3c4c7;padding:14px 16px;margin:0 0 20px;border-radius:4px;">
-			<h2 style="margin-top:0;"><?php esc_html_e('Toplist Block Pro License', 'toplist'); ?></h2>
-			<?php if ($api_locked) : ?>
+			<h2 style="margin-top:0;"><?php esc_html_e( 'Toplist Block Pro License', 'toplist' ); ?></h2>
+			<?php if ( $api_locked ) : ?>
 				<p class="description" style="margin:0 0 12px;">
-					<?php esc_html_e('Portal connection is locked by wp-config.php constants (TOPLIST_BLOCK_LICENSE_API_*). Remove those defines to edit here.', 'toplist'); ?>
+					<?php esc_html_e( 'Portal connection is locked by wp-config.php constants (TOPLIST_BLOCK_LICENSE_API_*). Remove those defines to edit here.', 'toplist' ); ?>
 				</p>
 			<?php endif; ?>
-			<?php if ($api_url === '') : ?>
+			<?php if ( '' === $api_url ) : ?>
 				<div class="notice notice-warning inline" style="margin:0 0 12px;padding:8px 12px;">
 					<p style="margin:0;">
-						<?php esc_html_e('Enter your portal license API URL and module API key below, then save your license key.', 'toplist'); ?>
+						<?php esc_html_e( 'Enter your portal license API URL and module API key below, then save your license key.', 'toplist' ); ?>
 					</p>
 				</div>
 			<?php endif; ?>
 			<p style="margin-top:0;">
-				<?php if ($valid) : ?>
-					<strong style="color:#1d7e2c;">&#9679; <?php esc_html_e('Pro active', 'toplist'); ?></strong>
-				<?php elseif ($status === 'unreachable' && !empty($cache['last_valid_at'])) : ?>
-					<strong style="color:#b45309;">&#9679; <?php esc_html_e('Pro (grace — API unreachable)', 'toplist'); ?></strong>
+				<?php if ( $valid ) : ?>
+					<strong style="color:#1d7e2c;">&#9679; <?php esc_html_e( 'Pro active', 'toplist' ); ?></strong>
+				<?php elseif ( 'unreachable' === $status && ! empty( $cache['last_valid_at'] ) ) : ?>
+					<strong style="color:#b45309;">&#9679; <?php esc_html_e( 'Pro (grace — API unreachable)', 'toplist' ); ?></strong>
 				<?php else : ?>
-					<strong style="color:#b32d2e;">&#9675; <?php esc_html_e('Pro inactive', 'toplist'); ?></strong>
+					<strong style="color:#b32d2e;">&#9675; <?php esc_html_e( 'Pro inactive', 'toplist' ); ?></strong>
 				<?php endif; ?>
-				<?php if (Toplist_Block_Util::array_string($cache, 'key_last4') !== '') : ?>
-					<span>…<?php echo esc_html(Toplist_Block_Util::array_string($cache, 'key_last4')); ?></span>
+				<?php if ( '' !== Toplist_Block_Util::array_string( $cache, 'key_last4' ) ) : ?>
+					<span>…<?php echo esc_html( Toplist_Block_Util::array_string( $cache, 'key_last4' ) ); ?></span>
 				<?php endif; ?>
-				<?php if (Toplist_Block_Util::array_string($cache, 'expires_at') !== '') : ?>
-					<span><?php printf(esc_html__('Expires %s', 'toplist'), esc_html(gmdate('Y-m-d', (int) strtotime(Toplist_Block_Util::array_string($cache, 'expires_at'))))); ?></span>
-				<?php elseif (Toplist_Block_Util::array_string($cache, 'billing_period') !== '') : ?>
-					<span><?php echo esc_html(ucfirst(Toplist_Block_Util::array_string($cache, 'billing_period'))); ?></span>
+				<?php if ( '' !== Toplist_Block_Util::array_string( $cache, 'expires_at' ) ) : ?>
+					<span>
+						<?php
+						/* translators: %s: expiration date */
+						printf( esc_html__( 'Expires %s', 'toplist' ), esc_html( gmdate( 'Y-m-d', (int) strtotime( Toplist_Block_Util::array_string( $cache, 'expires_at' ) ) ) ) );
+						?>
+					</span>
+				<?php elseif ( '' !== Toplist_Block_Util::array_string( $cache, 'billing_period' ) ) : ?>
+					<span><?php echo esc_html( ucfirst( Toplist_Block_Util::array_string( $cache, 'billing_period' ) ) ); ?></span>
 				<?php endif; ?>
 			</p>
-			<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-bottom:12px;">
-				<?php wp_nonce_field('toplist_license_save'); ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-bottom:12px;">
+				<?php wp_nonce_field( 'toplist_license_save' ); ?>
 				<input type="hidden" name="action" value="toplist_license_save">
 				<table class="form-table" role="presentation" style="margin:0;">
 					<tr>
-						<th scope="row"><label for="toplist_license_api_url"><?php esc_html_e('License API URL', 'toplist'); ?></label></th>
+						<th scope="row"><label for="toplist_license_api_url"><?php esc_html_e( 'License API URL', 'toplist' ); ?></label></th>
 						<td>
-							<input type="url" name="toplist_license_api_url" id="toplist_license_api_url" value="<?php echo esc_attr($api_locked ? $api_url : ($stored_api_url !== '' ? $stored_api_url : $api_url)); ?>" class="large-text code" placeholder="https://portal.example.com/api/v1/toplist-block/validate" <?php disabled($api_locked); ?>>
-							<p class="description"><?php esc_html_e('Portal validate endpoint, e.g. /api/v1/toplist-block/validate', 'toplist'); ?></p>
+							<input type="url" name="toplist_license_api_url" id="toplist_license_api_url" value="<?php echo esc_attr( $api_locked ? $api_url : ( '' !== $stored_api_url ? $stored_api_url : $api_url ) ); ?>" class="large-text code" placeholder="https://portal.example.com/api/v1/toplist-block/validate" <?php disabled( $api_locked ); ?>>
+							<p class="description"><?php esc_html_e( 'Portal validate endpoint, e.g. /api/v1/toplist-block/validate', 'toplist' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="toplist_license_api_key"><?php esc_html_e('Module API key', 'toplist'); ?></label></th>
+						<th scope="row"><label for="toplist_license_api_key"><?php esc_html_e( 'Module API key', 'toplist' ); ?></label></th>
 						<td>
-							<input type="password" name="toplist_license_api_key" id="toplist_license_api_key" value="" class="regular-text" autocomplete="off" placeholder="<?php echo $has_api_key ? esc_attr__('•••••••• (saved)', 'toplist') : esc_attr__('tbl_…', 'toplist'); ?>" <?php disabled($api_locked); ?>>
-							<p class="description"><?php esc_html_e('From portal config (toplist_block_api_key). Leave blank to keep the saved key.', 'toplist'); ?></p>
+							<input type="password" name="toplist_license_api_key" id="toplist_license_api_key" value="" class="regular-text" autocomplete="off" placeholder="<?php echo $has_api_key ? esc_attr__( '•••••••• (saved)', 'toplist' ) : esc_attr__( 'tbl_…', 'toplist' ); ?>" <?php disabled( $api_locked ); ?>>
+							<p class="description"><?php esc_html_e( 'From portal config (toplist_block_api_key). Leave blank to keep the saved key.', 'toplist' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="toplist_license_key"><?php esc_html_e('License key', 'toplist'); ?></label></th>
+						<th scope="row"><label for="toplist_license_key"><?php esc_html_e( 'License key', 'toplist' ); ?></label></th>
 						<td>
-							<input type="text" name="toplist_license_key" id="toplist_license_key" value="" class="regular-text" placeholder="<?php esc_attr_e('xxxx-xxxx-xxxx-xxxx', 'toplist'); ?>" autocomplete="off" style="min-width:260px;">
+							<input type="text" name="toplist_license_key" id="toplist_license_key" value="" class="regular-text" placeholder="<?php esc_attr_e( 'xxxx-xxxx-xxxx-xxxx', 'toplist' ); ?>" autocomplete="off" style="min-width:260px;">
 						</td>
 					</tr>
 				</table>
 				<p style="margin:8px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-					<button type="submit" class="button button-primary"><?php esc_html_e('Save & verify', 'toplist'); ?></button>
-					<?php if (Toplist_Block_License::get_key() !== '') : ?>
-						<button type="submit" name="toplist_license_remove" value="1" class="button"><?php esc_html_e('Remove key', 'toplist'); ?></button>
+					<button type="submit" class="button button-primary"><?php esc_html_e( 'Save & verify', 'toplist' ); ?></button>
+					<?php if ( Toplist_Block_License::get_key() !== '' ) : ?>
+						<button type="submit" name="toplist_license_remove" value="1" class="button"><?php esc_html_e( 'Remove key', 'toplist' ); ?></button>
 					<?php endif; ?>
 				</p>
 			</form>
-			<?php if (Toplist_Block_License::get_key() !== '') : ?>
-				<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">
-					<?php wp_nonce_field('toplist_license_recheck'); ?>
+			<?php if ( Toplist_Block_License::get_key() !== '' ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline;">
+					<?php wp_nonce_field( 'toplist_license_recheck' ); ?>
 					<input type="hidden" name="action" value="toplist_license_recheck">
-					<button type="submit" class="button button-secondary"><?php esc_html_e('Check now', 'toplist'); ?></button>
+					<button type="submit" class="button button-secondary"><?php esc_html_e( 'Check now', 'toplist' ); ?></button>
 				</form>
 			<?php endif; ?>
-			<?php if ($next) : ?>
+			<?php if ( $next ) : ?>
 				<p class="description" style="margin:8px 0 0;">
-					<?php printf(esc_html__('Next scheduled recheck: %s UTC', 'toplist'), esc_html(gmdate('Y-m-d H:i', $next))); ?>
+					<?php
+					/* translators: %s: next scheduled recheck date */
+					printf( esc_html__( 'Next scheduled recheck: %s UTC', 'toplist' ), esc_html( gmdate( 'Y-m-d H:i', $next ) ) );
+					?>
 				</p>
 			<?php endif; ?>
 			<p class="description" style="margin-bottom:0;">
-				<?php esc_html_e('Local toplist blocks keep working without a license. Library, import, and linked lists require Pro.', 'toplist'); ?>
+				<?php esc_html_e( 'Local toplist blocks keep working without a license. Library, import, and linked lists require Pro.', 'toplist' ); ?>
 				<?php
 				$allowed = Toplist_Block_License::get_allowed_domains();
-				if ($allowed !== array()) :
+				if ( array() !== $allowed ) :
 					?>
-					<br><?php esc_html_e('Licensed for:', 'toplist'); ?> <code><?php echo esc_html(implode(', ', $allowed)); ?></code>.
-					<?php esc_html_e('Add staging or satellite domains in your portal account before using this key on other hosts.', 'toplist'); ?>
+					<br><?php esc_html_e( 'Licensed for:', 'toplist' ); ?> <code><?php echo esc_html( implode( ', ', $allowed ) ); ?></code>.
+					<?php
+					/* translators: %s: domain list */
+					esc_html_e( 'Add staging or satellite domains in your portal account before using this key on other hosts.', 'toplist' );
+					?>
 				<?php endif; ?>
 			</p>
 		</div>

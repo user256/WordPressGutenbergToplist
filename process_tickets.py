@@ -40,7 +40,8 @@ COMPLETED_OVERVIEW = COMPLETED_DIR / "overview.md"
 
 TICKET_LINE_RE = re.compile(
     r'^(?P<indent>\s*)-\s*\[(?P<box>[ xX])\]\s*'
-    r'\[(?P<label>[^\]]+)\]\((?P<href>[^)]+)\)\s*$'
+    r'\[(?P<label>[^\]]+)\]\((?P<href>[^)]+)\)'
+    r'(?P<title>\s+—\s+.+)?\s*$'
 )
 DEFAULT_SPRINT_PATTERN = r'^#\s+Sprint\s+\d+\b'
 TOP_HEADING_RE = re.compile(r'^#\s+')
