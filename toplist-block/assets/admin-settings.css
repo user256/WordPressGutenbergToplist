@@ -1,0 +1,56 @@
+.toplist-settings-tabs {
+	margin-top: 18px;
+}
+
+.toplist-settings-panel[hidden] {
+	display: none !important;
+}
+
+.toplist-settings-panel {
+	margin-top: 16px;
+}
+
+.toplist-panel-note {
+	background: #f0f6fc;
+	border: 1px solid #c5d9ed;
+	border-radius: 6px;
+	margin: 0 0 14px;
+	padding: 10px 12px;
+}
+
+.toplist-panel-note p {
+	margin: 0 0 8px;
+}
+
+.toplist-panel-note p:last-child {
+	margin-bottom: 0;
+}
+
+.toplist-toggle-groups {
+	display: grid;
+	gap: 12px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	max-width: 980px;
+}
+
+.toplist-toggle-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 12px;
+}
+
+.toplist-toggle-card h3 {
+	margin: 0 0 10px;
+}
+
+.toplist-toggle-card label {
+	display: block;
+	margin: 0 0 8px;
+}
+
+@media (max-width: 1024px) {
+	.toplist-toggle-groups {
+		grid-template-columns: 1fr;
+	}
+}

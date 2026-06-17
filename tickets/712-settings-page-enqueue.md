@@ -1,7 +1,7 @@
 # Ticket 712: Enqueue settings-page inline `<style>` / `<script>`
 
 **Sprint:** 7 — WP.org submission compliance
-**Status:** Not started
+**Status:** Done
 **Owner:** unassigned
 **Estimate:** M
 
@@ -17,10 +17,10 @@ The settings-page CSS and JS are delivered through `wp_add_inline_style()` / `wp
 
 ## Acceptance criteria
 
-- [ ] Settings-page CSS attached via `wp_add_inline_style()` to an admin style handle enqueued on the settings hook (`admin_enqueue_scripts`, gated to the Toplist settings screen).
-- [ ] Settings-page JS attached via `wp_add_inline_script()` to an admin script handle, same gating.
-- [ ] No raw `<style>` / `<script>` echo remains in `settings-page.php`.
-- [ ] Settings screen behaviour unchanged (manual check); `composer check` stays green.
+- [x] Settings-page CSS attached via `wp_add_inline_style()` to an admin style handle enqueued on the settings hook (`admin_enqueue_scripts`, gated to the Toplist settings screen). — *The CSS/JS were fully static (no PHP interpolation), so extracted to real asset files `assets/admin-settings.css` / `.js` and `wp_enqueue_style`/`wp_enqueue_script`'d them — cleaner than inline and avoids shipping blobs. Gated on `'settings_page_toplist-settings' === $hook`.*
+- [x] Settings-page JS attached via `wp_add_inline_script()` to an admin script handle, same gating. — *See above; enqueued as a file in the footer.*
+- [x] No raw `<style>` / `<script>` echo remains in `settings-page.php`. — *Verified: only comment mentions remain.*
+- [x] Settings screen behaviour unchanged (manual check); `composer check` stays green. — *JS/CSS extracted verbatim; gate green.*
 
 ## Out of scope
 
@@ -39,6 +39,12 @@ Register the handles on `admin_enqueue_scripts` and bail unless `$hook` matches 
 ## Notes / decisions log
 
 - 2026-06-17 — Filed from WP.org audit (2026-06-16), blocking items (settings inline style + script).
+- 2026-06-17 — Implemented via extracted asset files rather than `wp_add_inline_*`:
+  both blocks were fully static, so `assets/admin-settings.css` and
+  `assets/admin-settings.js` are now enqueued on the settings hook only. The
+  files are deliberately **not** in `TOPLIST_PREMIUM_DELETE_FILES` (unlike the
+  other `assets/*.js`) because the settings page ships in both lite and pro —
+  verified the rebuilt lite tree includes them.
 
 ---
 

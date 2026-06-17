@@ -287,65 +287,6 @@ function toplist_settings_page(): void {
 		// @toplist-premium-end
 		?>
 
-		<style>
-			.toplist-settings-tabs {
-				margin-top: 18px;
-			}
-
-			.toplist-settings-panel[hidden] {
-				display: none !important;
-			}
-
-			.toplist-settings-panel {
-				margin-top: 16px;
-			}
-
-			.toplist-panel-note {
-				background: #f0f6fc;
-				border: 1px solid #c5d9ed;
-				border-radius: 6px;
-				margin: 0 0 14px;
-				padding: 10px 12px;
-			}
-
-			.toplist-panel-note p {
-				margin: 0 0 8px;
-			}
-
-			.toplist-panel-note p:last-child {
-				margin-bottom: 0;
-			}
-
-			.toplist-toggle-groups {
-				display: grid;
-				gap: 12px;
-				grid-template-columns: repeat(2, minmax(0, 1fr));
-				max-width: 980px;
-			}
-
-			.toplist-toggle-card {
-				background: #fff;
-				border: 1px solid #dcdcde;
-				border-radius: 6px;
-				padding: 12px;
-			}
-
-			.toplist-toggle-card h3 {
-				margin: 0 0 10px;
-			}
-
-			.toplist-toggle-card label {
-				display: block;
-				margin: 0 0 8px;
-			}
-
-			@media (max-width: 1024px) {
-				.toplist-toggle-groups {
-					grid-template-columns: 1fr;
-				}
-			}
-		</style>
-
 		<div class="nav-tab-wrapper toplist-settings-tabs" role="tablist" aria-label="Toplist settings tabs">
 			<button type="button" class="nav-tab nav-tab-active" data-tab-target="toplist-tab-defaults" aria-selected="true">
 				Defaults
@@ -622,137 +563,40 @@ function toplist_settings_page(): void {
 				</p>
 			</form>
 
-			<script>
-				(function () {
-					const tabButtons = document.querySelectorAll('[data-tab-target]');
-					const tabPanels = document.querySelectorAll('.toplist-settings-panel');
-					const textarea = document.getElementById('toplist_global_css');
-					const msg = document.getElementById('toplist-theme-msg');
-					const appendBox = document.getElementById('toplist-append-mode');
-
-					function setActiveTab(targetId) {
-						tabButtons.forEach((button) => {
-							const isActive = button.getAttribute('data-tab-target') === targetId;
-							button.classList.toggle('nav-tab-active', isActive);
-							button.setAttribute('aria-selected', isActive ? 'true' : 'false');
-						});
-
-						tabPanels.forEach((panel) => {
-							panel.hidden = panel.id !== targetId;
-						});
-					}
-
-					tabButtons.forEach((button) => {
-						button.addEventListener('click', () => {
-							const targetId = button.getAttribute('data-tab-target');
-							setActiveTab(targetId);
-						});
-					});
-
-					if (tabButtons.length) {
-						setActiveTab(tabButtons[0].getAttribute('data-tab-target'));
-					}
-
-					const toggleCheckboxes = document.querySelectorAll('.toplist-toggle-checkbox');
-					const enableAllBtn = document.getElementById('toplist-toggle-enable-all');
-					const disableAllBtn = document.getElementById('toplist-toggle-disable-all');
-
-					if (enableAllBtn) {
-						enableAllBtn.addEventListener('click', () => {
-							toggleCheckboxes.forEach((cb) => cb.checked = true);
-						});
-					}
-
-					if (disableAllBtn) {
-						disableAllBtn.addEventListener('click', () => {
-							toggleCheckboxes.forEach((cb) => cb.checked = false);
-						});
-					}
-
-					if (!textarea) {
-						return;
-					}
-
-					function setMessage(text) {
-						if (!msg) return;
-						msg.textContent = text;
-						window.clearTimeout(setMessage._t);
-						setMessage._t = window.setTimeout(() => msg.textContent = '', 2500);
-					}
-
-					function applyCss(css, { append = false } = {}) {
-						const trimmed = css.trim();
-						if (!trimmed) return;
-
-						if (append && textarea.value.trim()) {
-							textarea.value = textarea.value.replace(/\s+$/, '') + "\n\n" + trimmed + "\n";
-						} else {
-							textarea.value = trimmed + "\n";
-						}
-						textarea.focus();
-						setMessage(append ? 'Appended CSS ✅' : 'Applied CSS ✅');
-					}
-
-					// Click-to-apply themes
-					document.querySelectorAll('.toplist-theme-btn').forEach(btn => {
-						btn.addEventListener('click', () => {
-							const css = btn.getAttribute('data-css') || '';
-							applyCss(css, { append: false });
-						});
-					});
-
-					// Clear button
-					const clearBtn = document.getElementById('toplist-clear-css');
-					if (clearBtn) {
-						clearBtn.addEventListener('click', () => {
-							textarea.value = '';
-							setMessage('Cleared ✅');
-							textarea.focus();
-						});
-					}
-
-					// Custom colour generator
-					function val(id) {
-						const el = document.getElementById(id);
-						return el ? el.value : '';
-					}
-
-					const applyCustomBtn = document.getElementById('toplist-apply-custom');
-					if (applyCustomBtn) {
-						applyCustomBtn.addEventListener('click', () => {
-							const primary = val('toplist-color-primary');
-							const secondary = val('toplist-color-secondary');
-							const hover = val('toplist-color-hover');
-							const cardbg = val('toplist-color-cardbg');
-							const text = val('toplist-color-text');
-
-							// Keep it simple + safe: generate only the selectors you already documented.
-							const css =
-								`.toplist .operator-column-ranking-v2{
-			background: linear-gradient(135deg, ${primary} 0%, ${secondary} 100%);
-			}
-
-			.toplist .operator-playnow-column-v2 .button-blue-v2{
-			background: linear-gradient(135deg, ${primary} 0%, ${secondary} 100%);
-			}
-
-			.toplist .operator-item:hover{
-			border-color: ${hover};
-			}
-
-			.toplist .operator-item{
-			background: ${cardbg};
-			color: ${text};
-			}`;
-
-							applyCss(css, { append: !!appendBox && appendBox.checked });
-						});
-					}
-				})();
-			</script>
-
 		</div>
 	<?php
+}
+
+add_action( 'admin_enqueue_scripts', 'toplist_enqueue_settings_assets' );
+
+/**
+ * Enqueue settings-screen CSS/JS, scoped to the Toplist Block settings page.
+ *
+ * Replaces the inline <style>/<script> blocks the page used to echo so admin
+ * assets are delivered through the WordPress enqueue APIs (ticket 712).
+ *
+ * @param string $hook Current admin page hook suffix.
+ * @return void
+ */
+function toplist_enqueue_settings_assets( string $hook ): void {
+	if ( 'settings_page_toplist-settings' !== $hook ) {
+		return;
+	}
+	$entry   = __DIR__ . '/toplist-block.php';
+	$version = defined( 'TOPLIST_BLOCK_VERSION' ) ? TOPLIST_BLOCK_VERSION : false;
+	wp_enqueue_style(
+		'toplist-settings',
+		plugins_url( 'assets/admin-settings.css', $entry ),
+		array(),
+		$version
+	);
+	wp_enqueue_script(
+		'toplist-settings',
+		plugins_url( 'assets/admin-settings.js', $entry ),
+		array(),
+		$version,
+		true
+	);
 }
 
 	// Output global CSS in frontend and editor.
