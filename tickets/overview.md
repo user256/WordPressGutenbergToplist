@@ -26,7 +26,7 @@ See `tickets/completed/overview.md` for archived Sprints 1–6.
 From the WP.org audit ([`docs/wporg-audit-toplist-block-lite-2026-06-16.md`](../docs/wporg-audit-toplist-block-lite-2026-06-16.md)). Fixes land in `toplist-block/` (premium source) or `scripts/build-lite.php` — never in the generated `toplist-block-lite/` tree — then rebuild.
 
 - [x] [710](710-lite-upgrade-url.md) — Set real lite upgrade URL (404 fix)
-- [ ] [711](711-frontend-css-enqueue.md) — Enqueue front-end CSS instead of inline `<style>`
+- [x] [711](711-frontend-css-enqueue.md) — Enqueue front-end CSS instead of inline `<style>`
 - [ ] [712](712-settings-page-enqueue.md) — Enqueue settings-page inline `<style>` / `<script>`
 - [ ] [713](713-lite-upgrade-notice-enqueue.md) — Move lite upgrade-notice `<script>` to enqueued handle
 - [ ] [714](714-demo-url-cleanup.md) — Replace demo `example.com` / placeholder URLs in sample content

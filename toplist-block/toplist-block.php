@@ -876,6 +876,34 @@ function toplist_allowed_link_html(): array {
 }
 
 /**
+ * Attach per-render CSS to the block's registered style handle.
+ *
+ * Used instead of echoing raw <style> tags during render so user/site CSS is
+ * delivered through the WordPress enqueue APIs (ticket 711). The block declares
+ * `'style' => 'toplist-style'`, so the handle is enqueued whenever the block
+ * renders; we enqueue defensively and append the CSS as an inline style.
+ *
+ * @param string $css CSS to attach. Empty strings are ignored.
+ * @return void
+ */
+function toplist_add_render_inline_css( string $css ): void {
+	// Strip any markup (notably a "</style>" breakout) before it reaches the
+	// stylesheet. CSS itself is not HTML-escaped — escaping would corrupt valid
+	// selectors such as "a > b" — so wp_strip_all_tags is the right guard here.
+	$css = trim( wp_strip_all_tags( $css ) );
+	if ( '' === $css ) {
+		return;
+	}
+	if ( ! wp_style_is( 'toplist-style', 'registered' ) ) {
+		return;
+	}
+	if ( ! wp_style_is( 'toplist-style', 'enqueued' ) ) {
+		wp_enqueue_style( 'toplist-style' );
+	}
+	wp_add_inline_style( 'toplist-style', $css );
+}
+
+/**
  * Render the toplist block.
  *
  * @param array<string, mixed> $attributes Block attributes.
@@ -991,22 +1019,21 @@ function toplist_render( array $attributes ): string {
 	$show_read_review = ( isset( $attributes['showReadReview'] ) ? (bool) $attributes['showReadReview'] : true ) && (bool) apply_filters( 'toplist_get_render_bool', toplist_get_global_bool_option( 'toplist_global_show_read_review', true ), $list_context_id, 'toplist_global_show_read_review', true );
 	$show_withdrawals = ( isset( $attributes['showWithdrawals'] ) ? (bool) $attributes['showWithdrawals'] : true ) && (bool) apply_filters( 'toplist_get_render_bool', toplist_get_global_bool_option( 'toplist_global_show_withdrawals', true ), $list_context_id, 'toplist_global_show_withdrawals', true );
 
-	ob_start();
-
 	$global_css = (string) apply_filters( 'toplist_get_render_css', '', $list_context_id );
 	if ( '' === $global_css ) {
 		$raw_css    = get_option( 'toplist_global_css', '' );
 		$global_css = is_string( $raw_css ) ? trim( wp_strip_all_tags( $raw_css ) ) : '';
 	}
-	if ( '' !== $global_css ) {
-		echo '<style>' . esc_html( $global_css ) . '</style>';
-	}
-	if ( '' !== $custom_css ) {
-		echo '<style>' . esc_html( wp_strip_all_tags( $custom_css ) ) . '</style>';
-	}
-	if ( '' !== $card_layout_css ) {
-		echo '<style>' . esc_html( wp_strip_all_tags( $card_layout_css ) ) . '</style>';
-	}
+
+	// Deliver per-render CSS through the block's registered style handle via
+	// wp_add_inline_style() rather than echoing raw <style> tags (ticket 711).
+	// The helper strips markup, so raw values are fine here.
+	toplist_add_render_inline_css( $global_css );
+	toplist_add_render_inline_css( $custom_css );
+	toplist_add_render_inline_css( $card_layout_css );
+
+	ob_start();
+
 	if ( '' !== $effective_heading_text ) {
 		echo '<h2 class="toplist-heading">' . esc_html( $effective_heading_text ) . '</h2>';
 	}
