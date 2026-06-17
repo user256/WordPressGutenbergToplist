@@ -2,9 +2,9 @@
 
 This roadmap tracks the two-plugin commercialisation programme for Toplist Block: a **premium canonical source** (`toplist-block/`) and a **generated lite build** (`toplist-block-lite/`) for WordPress.org, following the solar-form pattern.
 
-**Programme status:** Sprints 1–6 complete (launch-ready).
+**Programme status:** Sprints 1–7 complete (launch-ready).
 
-See `tickets/completed/overview.md` for archived Sprints 1–6.
+See `tickets/completed/overview.md` for archived Sprints 1–7.
 
 ---
 
