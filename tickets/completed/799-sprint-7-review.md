@@ -1,7 +1,7 @@
 # Ticket 799: Sprint 7 review — rebuild & re-audit
 
 **Sprint:** 7 — WP.org submission compliance
-**Status:** Not started
+**Status:** Done
 **Owner:** unassigned
 **Estimate:** S
 
@@ -17,11 +17,11 @@ A rebuilt lite tree passes a fresh audit sweep with all 🔴 blocking items reso
 
 ## Acceptance criteria
 
-- [ ] 710–713 complete (714 complete or explicitly deferred).
-- [ ] `php scripts/build-lite.php` rebuilds `toplist-block-lite/`; `composer check` green.
-- [ ] Re-run the audit sweep against the regenerated tree; record results in a dated `docs/wporg-audit-toplist-block-lite-<date>.md`.
-- [ ] No remaining 🔴 blocking items; any new findings filed as tickets.
-- [ ] Programme-status table / launch checklist in `tickets/overview.md` updated.
+- [x] 710–713 complete (714 complete or explicitly deferred). — *710–714 all done.*
+- [x] `php scripts/build-lite.php` rebuilds `toplist-block-lite/`; `composer check` green.
+- [x] Re-run the audit sweep against the regenerated tree; record results in a dated `docs/wporg-audit-toplist-block-lite-<date>.md`. — *[docs/wporg-audit-toplist-block-lite-2026-06-17.md](../docs/wporg-audit-toplist-block-lite-2026-06-17.md).*
+- [x] No remaining 🔴 blocking items; any new findings filed as tickets. — *All 5 blocking items resolved; no new findings. Two operator actions noted (real upgrade URL; optional name review).*
+- [x] Programme-status table / launch checklist in `tickets/overview.md` updated.
 
 ## Dependencies
 
