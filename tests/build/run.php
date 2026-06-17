@@ -7,7 +7,8 @@
 
 $root = dirname(__DIR__, 2);
 $lite = $root . '/toplist-block-lite';
-$build = 'cd ' . escapeshellarg($root) . ' && php scripts/build-lite.php 2>&1';
+// Smoke builds use the placeholder upgrade URL; allow it (ticket 710 guard).
+$build = 'cd ' . escapeshellarg($root) . ' && TOPLIST_LITE_ALLOW_PLACEHOLDER_URL=1 php scripts/build-lite.php 2>&1';
 
 exec($build, $out, $code);
 $output = implode("\n", $out);

@@ -13,13 +13,28 @@ if (PHP_SAPI !== 'cli') {
 }
 
 const TOPLIST_LITE_TEXT_DOMAIN = 'toplist-block-lite';
+// Placeholder default. A build that still resolves to this is rejected below so
+// the lite tree can never ship the dead example.com/toplist-pricing.php 404 to
+// WordPress.org (ticket 710). Supply the real public pricing/upgrade page via:
+//   TOPLIST_LITE_UPGRADE_URL=https://… php scripts/build-lite.php
 const TOPLIST_LITE_UPGRADE_URL   = 'https://example.com/toplist-pricing.php';
-// Override at build: TOPLIST_LITE_UPGRADE_URL=... php scripts/build-lite.php
 $lite_upgrade_url = getenv('TOPLIST_LITE_UPGRADE_URL');
 if (is_string($lite_upgrade_url) && $lite_upgrade_url !== '') {
 	define('TOPLIST_LITE_UPGRADE_URL_RUNTIME', $lite_upgrade_url);
 } else {
 	define('TOPLIST_LITE_UPGRADE_URL_RUNTIME', TOPLIST_LITE_UPGRADE_URL);
+}
+
+// Guard: never ship the placeholder upgrade URL. Allow it only when explicitly
+// permitted (e.g. local smoke builds) via TOPLIST_LITE_ALLOW_PLACEHOLDER_URL=1.
+if (
+	TOPLIST_LITE_UPGRADE_URL_RUNTIME === TOPLIST_LITE_UPGRADE_URL
+	&& getenv('TOPLIST_LITE_ALLOW_PLACEHOLDER_URL') !== '1'
+) {
+	fwrite(STDERR, "build-lite: refusing to build with the placeholder upgrade URL (" . TOPLIST_LITE_UPGRADE_URL . ").\n");
+	fwrite(STDERR, "  Set the real pricing page: TOPLIST_LITE_UPGRADE_URL=https://… php scripts/build-lite.php\n");
+	fwrite(STDERR, "  For a local/smoke build only: TOPLIST_LITE_ALLOW_PLACEHOLDER_URL=1 php scripts/build-lite.php\n");
+	exit(1);
 }
 
 const TOPLIST_DIST_EXCLUDE = array(

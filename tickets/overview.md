@@ -21,6 +21,19 @@ See `tickets/completed/overview.md` for archived Sprints 1–6.
 
 ---
 
+# Sprint 7 — WP.org submission compliance
+
+From the WP.org audit ([`docs/wporg-audit-toplist-block-lite-2026-06-16.md`](../docs/wporg-audit-toplist-block-lite-2026-06-16.md)). Fixes land in `toplist-block/` (premium source) or `scripts/build-lite.php` — never in the generated `toplist-block-lite/` tree — then rebuild.
+
+- [x] [710](710-lite-upgrade-url.md) — Set real lite upgrade URL (404 fix)
+- [ ] [711](711-frontend-css-enqueue.md) — Enqueue front-end CSS instead of inline `<style>`
+- [ ] [712](712-settings-page-enqueue.md) — Enqueue settings-page inline `<style>` / `<script>`
+- [ ] [713](713-lite-upgrade-notice-enqueue.md) — Move lite upgrade-notice `<script>` to enqueued handle
+- [ ] [714](714-demo-url-cleanup.md) — Replace demo `example.com` / placeholder URLs in sample content
+- [ ] [799](799-sprint-7-review.md) — Sprint 7 review — rebuild & re-audit
+
+---
+
 # Remedial (post-review)
 
 - [x] [105](completed/105-rest-api-auth-sanitization-fix.md) — REST API capability + sanitization fix
@@ -52,7 +65,7 @@ See [Sprint 6 review](../docs/sprint-6-review.md) and `tickets/completed/sprint-
 1. `composer check` — green CI (unit tests + PHPStan + lite build smoke)
 2. Local license E2E: `bash scripts/setup-local-license.sh` — see `docs/local-dev.md`
 3. Portal: seed plans, configure `toplist_block_*` keys, upload premium zip
-4. WP.org: submit `toplist-block-lite.zip` + assets
+4. WP.org: build lite with the real upgrade URL — `TOPLIST_LITE_UPGRADE_URL=https://… php scripts/build-lite.php` (a bare build refuses the `example.com` placeholder; verify the page returns 200), then submit `toplist-block-lite.zip` + assets
 5. Portal: open Stripe checkout on `/toplist-pricing.php` for `toplist-block-pro*` plans
 
 ---
