@@ -1,7 +1,7 @@
 # Ticket 713: Move lite upgrade-notice `<script>` to an enqueued/inline handle
 
 **Sprint:** 7 — WP.org submission compliance
-**Status:** Not started
+**Status:** Done
 **Owner:** unassigned
 **Estimate:** S
 
@@ -17,10 +17,10 @@ The lite upgrade-notice dismissal JS is delivered via `wp_add_inline_script()` o
 
 ## Acceptance criteria
 
-- [ ] The generated upgrade-notice PHP attaches its dismissal JS via `wp_add_inline_script()` (admin handle), no raw `<script>` echo.
-- [ ] `php scripts/build-lite.php` produces a lite tree whose upgrade notice still dismisses correctly (manual check) and contains no inline `<script>` for the notice.
-- [ ] Existing nonce/capability checks on dismissal are preserved.
-- [ ] `composer test:build` and `composer check` stay green.
+- [x] The generated upgrade-notice PHP attaches its dismissal JS via `wp_add_inline_script()` (admin handle), no raw `<script>` echo. — *New `toplist_lite_upgrade_notice_assets()` registers a src-less handle with `jquery` dep on `admin_enqueue_scripts` and attaches the JS inline.*
+- [x] `php scripts/build-lite.php` produces a lite tree whose upgrade notice still dismisses correctly (manual check) and contains no inline `<script>` for the notice. — *Rebuilt lite: no `echo '<script` in the main file; handler present.*
+- [x] Existing nonce/capability checks on dismissal are preserved. — *Same `wp_create_nonce('toplist_lite_dismiss')`, same `is_admin()`/`manage_options`/dismissed-meta guards, same AJAX `check_ajax_referer` + cap check.*
+- [x] `composer test:build` and `composer check` stay green.
 
 ## Out of scope
 
@@ -39,6 +39,12 @@ Edit the heredoc/string in `toplist_lite_upgrade_notice_php()` so the emitted PH
 ## Notes / decisions log
 
 - 2026-06-17 — Filed from WP.org audit (2026-06-16), blocking item (upgrade-notice inline script). Build-script change, not premium source.
+- 2026-06-17 — Split the work: the notice markup stays on `admin_notices`; the
+  dismiss JS moved to a new `admin_enqueue_scripts` handler using a registered
+  src-less handle (`toplist-lite-upgrade-notice`, dep `jquery`) +
+  `wp_add_inline_script()`. Nonce passed via `wp_json_encode()` instead of
+  `esc_js()`. Edited the heredoc in `toplist_lite_upgrade_notice_php()` in
+  `scripts/build-lite.php`.
 
 ---
 

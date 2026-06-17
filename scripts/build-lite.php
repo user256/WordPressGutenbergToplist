@@ -251,9 +251,30 @@ function toplist_lite_upgrade_notice()
 	echo ' <a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">';
 	echo esc_html__('Learn about Toplist Block Pro', 'toplist-block-lite');
 	echo '</a></p></div>';
-	echo '<script>(function(){var n=document.querySelector("[data-toplist-lite-notice]");if(!n||!window.jQuery)return;jQuery(n).on("click",".notice-dismiss",function(){jQuery.post(ajaxurl,{action:"toplist_lite_dismiss_upgrade_notice",_ajax_nonce:"' . esc_js(wp_create_nonce('toplist_lite_dismiss')) . '"});});})();</script>';
 }
 add_action('admin_notices', 'toplist_lite_upgrade_notice');
+
+/**
+ * Enqueue the dismiss handler for the upgrade notice via an inline script
+ * attached to a registered handle (no raw <script> echo).
+ *
+ * @return void
+ */
+function toplist_lite_upgrade_notice_assets()
+{
+	if (!is_admin() || !current_user_can('manage_options')) {
+		return;
+	}
+	if (get_user_meta(get_current_user_id(), 'toplist_lite_upgrade_notice_dismissed', true)) {
+		return;
+	}
+	wp_register_script('toplist-lite-upgrade-notice', '', array('jquery'), false, true);
+	wp_enqueue_script('toplist-lite-upgrade-notice');
+	$nonce = wp_create_nonce('toplist_lite_dismiss');
+	$js    = '(function(){var n=document.querySelector("[data-toplist-lite-notice]");if(!n||!window.jQuery)return;jQuery(n).on("click",".notice-dismiss",function(){jQuery.post(ajaxurl,{action:"toplist_lite_dismiss_upgrade_notice",_ajax_nonce:' . wp_json_encode($nonce) . '});});})();';
+	wp_add_inline_script('toplist-lite-upgrade-notice', $js);
+}
+add_action('admin_enqueue_scripts', 'toplist_lite_upgrade_notice_assets');
 add_action('wp_ajax_toplist_lite_dismiss_upgrade_notice', function () {
 	check_ajax_referer('toplist_lite_dismiss');
 	if (!current_user_can('manage_options')) {
